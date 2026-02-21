@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VGA Swarm</title>
+  </head>
+  <body>
+    <main>
+      <h1>VGA Swarm</h1>
+      <p>Status viewer (Tauri commands via <code>window.__TAURI__.tauri.invoke</code>).</p>
+
+      <div>
+        <button id="refresh">Refresh</button>
+        <button id="deploy">Deploy Sample Project</button>
+        <button id="lease">Request Sample Compute</button>
+      </div>
+
+      <h2>Swarm</h2>
+      <pre id="swarm">(not loaded)</pre>
+
+      <h2>Vault</h2>
+      <div>
+        <label>
+          Provider:
+          <input id="vault-provider" value="openai" />
+        </label>
+        <label>
+          Key:
+          <input id="vault-key" value="" placeholder="sk-..." />
+        </label>
+        <button id="vault-store">Store</button>
+        <button id="vault-retrieve">Retrieve</button>
+        <button id="vault-list">List Providers</button>
+        <button id="vault-delete">Delete</button>
+        <button id="vault-usage">Usage</button>
+      </div>
+      <pre id="vault-output">(not loaded)</pre>
+
+      <h2>Agents</h2>
+      <pre id="agents">(not loaded)</pre>
+
+      <h2>Projects</h2>
+      <pre id="projects">(not loaded)</pre>
+
+      <h2>Leases</h2>
+      <pre id="leases">(not loaded)</pre>
+
+      <h2>Execute Task</h2>
+      <div>
+        <label>
+          Language:
+          <input id="task-language" value="rust" />
+        </label>
+        <label>
+          Target:
+          <input id="task-target" value="code" />
+        </label>
+      </div>
+      <div>
+        <label>
+          Context:
+          <textarea id="task-context" rows="4" cols="80">Generate a simple function</textarea>
+        </label>
+      </div>
+      <div>
+        <button id="execute">Execute</button>
+      </div>
+      <pre id="task-output">(not executed)</pre>
+    </main>
+
+    <script>
+      function pretty(value) {
+        try {
+          return JSON.stringify(value, null, 2);
+        } catch {
+          return String(value);
+        }
+      }
+
+      function setText(id, value) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = value;
+      }
+
+      async function getInvoke() {
+        const tauri = window.__TAURI__ && window.__TAURI__.tauri;
+        if (!tauri || typeof tauri.invoke !== 'function') {
+          throw new Error('Tauri invoke not available. Run via the Tauri app (cargo run).');
+        }
+        return tauri.invoke;
+      }
+
+      async function refreshAll() {
+        const invoke = await getInvoke();
+
+        const [swarm, agents, projects, leases] = await Promise.all([
+          invoke('cmd_get_swarm_status'),
+          invoke('cmd_get_all_agents'),
+          invoke('cmd_list_projects'),
+          invoke('cmd_list_leases'),
+        ]);
+
+        setText('swarm', pretty(swarm));
+        setText('agents', pretty(agents));
+        setText('projects', pretty(projects));
+        setText('leases', pretty(leases));
+      }
+
+      async function deploySampleProject() {
+        const invoke = await getInvoke();
+        await invoke('cmd_deploy_project', {
+          config: {
+            tech_stack: ['rust', 'tauri'],
+            default_provider: 'local',
+            concurrency_strategy: 'gatling',
+          },
+        });
+        await refreshAll();
+      }
+
+      async function requestSampleCompute() {
+        const invoke = await getInvoke();
+        await invoke('cmd_request_compute', {
+          req: {
+            gpu_required: false,
+            memory_mb: 2048,
+            duration_secs: 600,
+          },
+        });
+        await refreshAll();
+      }
+
+      async function executeTask() {
+        const invoke = await getInvoke();
+        const language = document.getElementById('task-language')?.value || 'rust';
+        const target = document.getElementById('task-target')?.value || 'code';
+        const context_range = document.getElementById('task-context')?.value || '';
+
+        const output = await invoke('cmd_execute_task', {
+          task_spec: { language, target, context_range },
+        });
+        setText('task-output', pretty(output));
+        await refreshAll();
+      }
+
+      document.getElementById('refresh')?.addEventListener('click', () => {
+        refreshAll().catch((e) => setText('swarm', String(e)));
+      });
+      document.getElementById('deploy')?.addEventListener('click', () => {
+        deploySampleProject().catch((e) => setText('projects', String(e)));
+      });
+      document.getElementById('lease')?.addEventListener('click', () => {
+        requestSampleCompute().catch((e) => setText('leases', String(e)));
+      });
+      document.getElementById('execute')?.addEventListener('click', () => {
+        executeTask().catch((e) => setText('task-output', String(e)));
+      });
+
+      async function vaultStore() {
+        const invoke = await getInvoke();
+        const provider = document.getElementById('vault-provider')?.value || '';
+        const key = document.getElementById('vault-key')?.value || '';
+        const ok = await invoke('cmd_vault_store', { provider, key });
+        setText('vault-output', pretty({ stored: ok, provider }));
+      }
+
+      async function vaultRetrieve() {
+        const invoke = await getInvoke();
+        const provider = document.getElementById('vault-provider')?.value || '';
+        const key = await invoke('cmd_vault_retrieve', { provider });
+        setText('vault-output', pretty({ provider, key }));
+      }
+
+      async function vaultList() {
+        const invoke = await getInvoke();
+        const providers = await invoke('cmd_vault_list');
+        setText('vault-output', pretty({ providers }));
+      }
+
+      async function vaultDelete() {
+        const invoke = await getInvoke();
+        const provider = document.getElementById('vault-provider')?.value || '';
+        const ok = await invoke('cmd_vault_delete', { provider });
+        setText('vault-output', pretty({ deleted: ok, provider }));
+      }
+
+      async function vaultUsage() {
+        const invoke = await getInvoke();
+        const usage = await invoke('cmd_vault_usage');
+        setText('vault-output', pretty({ usage }));
+      }
+
+      document.getElementById('vault-store')?.addEventListener('click', () => {
+        vaultStore().catch((e) => setText('vault-output', String(e)));
+      });
+      document.getElementById('vault-retrieve')?.addEventListener('click', () => {
+        vaultRetrieve().catch((e) => setText('vault-output', String(e)));
+      });
+      document.getElementById('vault-list')?.addEventListener('click', () => {
+        vaultList().catch((e) => setText('vault-output', String(e)));
+      });
+      document.getElementById('vault-delete')?.addEventListener('click', () => {
+        vaultDelete().catch((e) => setText('vault-output', String(e)));
+      });
+      document.getElementById('vault-usage')?.addEventListener('click', () => {
+        vaultUsage().catch((e) => setText('vault-output', String(e)));
+      });
+
+      // Auto refresh once on load.
+      refreshAll().catch((e) => setText('swarm', String(e)));
+    </script>
+  </body>
+</html>

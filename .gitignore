@@ -1,0 +1,41 @@
+# Rust
+target/
+**/*.rs.bk
+
+# Commit lockfile for binary apps (recommended)
+# Cargo.lock
+
+# Local installers / tools
+rustup-init.exe
+
+# Tauri
+src-tauri/target/
+src-tauri/Cargo.lock
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# Local secrets
+vault/
+
+# Build artifacts
+dist/*
+!dist/index.html
+build/
