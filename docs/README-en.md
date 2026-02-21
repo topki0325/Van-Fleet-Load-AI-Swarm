@@ -20,9 +20,13 @@ Welcome to the detailed documentation for the Vangriten AI Swarm framework. This
 ## Feature Module Documentation
 
 - [API Key Management](api-key-management-en.md): Manage API keys for multiple AI service providers with encrypted storage and usage statistics.
+  - [Chinese Version](api-key-management.md)
 - [Resource Manager Agent](resource-manager-en.md): LAN AI model resource discovery, distributed GPU resource allocation, network load balancing, and more.
+  - [Chinese Version](resource-manager.md)
 - [C Compiler Environment Management](c-compiler-en.md): Automatic GCC instance discovery, round-robin compilation, parallel compilation, and more.
+  - [Chinese Version](c-compiler.md)
 - [Ollama Integration](ollama-en.md): Run various open-source AI models locally with support for chat, text generation, and vector embeddings.
+  - [Chinese Version](ollama.md)
 
 ## Other Important Files
 
