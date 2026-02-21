@@ -23,11 +23,11 @@ Vangriten AI Swarm is a high-concurrency AI swarm framework built with Rust, des
 
 ### 🏗️ Architecture
 
-Vangriten-AI-Swarm draws inspiration from the "Van Fleet ammunition load" - the legendary artillery barrage tactic from the Korean War, reimagined as a coordinated AI agent framework:
+Vangriten-AI-Swarm draws inspiration from the "Van Fleet load" - the legendary artillery barrage tactic from the Korean War, reimagined as a coordinated AI agent framework:
 
 ```
 VAS = Vangriten AI Swarm
-├── V = Vangriten (Van Fleet Ammunition Load)
+├── V = Van Fleet (Van Fleet Load)
 │   └── Inspired by the overwhelming artillery barrage tactic
 │       that consumed massive ammunition in the Korean War
 ├── A = AI (Artificial Intelligence Agents)
@@ -38,7 +38,7 @@ VAS = Vangriten AI Swarm
     └── Collective: Unified AI agent ecosystem for complex tasks
 ```
 
-**Vangriten Concept**: Named after General James Van Fleet's legendary artillery tactic during the Korean War, where unprecedented ammunition consumption (36,000 artillery shells in 9 days for a single hill) demonstrated overwhelming firepower saturation. This framework applies similar saturation principles to AI agent coordination and resource orchestration.
+**Van Fleet Concept**: Named after General James Van Fleet's legendary artillery tactic during the Korean War, where unprecedented ammunition consumption (36,000 artillery shells in 9 days for a single hill) demonstrated overwhelming firepower saturation. This framework applies similar saturation principles to AI agent coordination and resource orchestration.
 
 ### 🚀 Quick Start
 
@@ -122,11 +122,11 @@ Vangriten AI Swarm 是一个高并发 AI 蜂群框架，基于 Rust 构建，旨
 
 ### 🏗️ 架构
 
-Vangriten-AI-Swarm 的灵感来源于朝鲜战争中的"范弗里特弹药量" - 传奇的火力压制战术，将其重新想象为协调的 AI 代理框架：
+Vangriten-AI-Swarm 的灵感来源于朝鲜战争中的"Van Fleet load" - 传奇的火力压制战术，将其重新想象为协调的 AI 代理框架：
 
 ```
 VAS = Vangriten AI Swarm
-├── V = Vangriten (范弗里特弹药量)
+├── V = Van Fleet (Van Fleet Load)
 │   └── 灵感来源于朝鲜战争中的压倒性火炮轰击战术
 │       9天内消耗3.6万发炮弹夺取一座小山的传奇战例
 ├── A = AI (人工智能代理)
@@ -137,7 +137,7 @@ VAS = Vangriten AI Swarm
     └── Collective: 统一AI代理生态系统处理复杂任务
 ```
 
-**Vangriten 概念**：以朝鲜战争中范弗里特将军的传奇火炮战术命名，当时前所未有的弹药消耗量（9天内3.6万发炮弹夺取一座小山）展示了压倒性的火力饱和能力。该框架将类似的饱和原理应用于 AI 代理协调和资源编排。
+**Van Fleet 概念**：以朝鲜战争中范弗里特将军的传奇火炮战术命名，当时前所未有的弹药消耗量（9天内3.6万发炮弹夺取一座小山）展示了压倒性的火力饱和能力。该框架将类似的饱和原理应用于 AI 代理协调和资源编排。
 
 ### 🚀 快速开始
 
