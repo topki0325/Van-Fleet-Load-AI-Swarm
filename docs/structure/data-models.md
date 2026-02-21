@@ -1,6 +1,6 @@
 # 共享数据模型 (Shared Entities & Unified Interfaces)
 
-Vangriten AI Swarm 建立了一套严谨、跨语言的对象模型（Entities），确保 Master 节点与 Slave 节点间在分布式推理、任务交换与工件聚合时的一致性。
+Van Fleet Load AI Swarm 建立了一套严谨、跨语言的对象模型（Entities），确保 Master 节点与 Slave 节点间在分布式推理、任务交换与工件聚合时的一致性。
 
 ## 📦 核心业务实体模型 (Core Models)
 
@@ -13,7 +13,7 @@ Vangriten AI Swarm 建立了一套严谨、跨语言的对象模型（Entities�
 ```rust
 struct Project {
     id: ProjectId,             // UUID
-    name: String,              // “VGA (Vangriten Gatling AI)swarm”
+    name: String,              // “Van Fleet Load AI Swarm”
     config: ProjectConfig,     // 技术栈、默认提供商、并发策略
     agents: Vec<AgentId>,      // 参与本项目的代理个体列表
     workflow: WorkflowGraph,   // DAG 描述的任务序列与依赖关系

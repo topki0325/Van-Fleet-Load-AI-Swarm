@@ -1,6 +1,6 @@
 # 前端组件与 API 接口 (Frontend & UI API)
 
-Vangriten AI Swarm 前端通过 Tauri 提供的强类型跨语言接口实现。所有 UI 组件均通过响应式框架构建，并对接 Rust 后端的指令流。
+Van Fleet Load AI Swarm 前端通过 Tauri 提供的强类型跨语言接口实现。所有 UI 组件均通过响应式框架构建，并对接 Rust 后端的指令流。
 
 ## 🖥️ 核心前端组件说明 (Frontend Components)
 

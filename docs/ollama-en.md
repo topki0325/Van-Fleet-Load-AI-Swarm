@@ -2,7 +2,7 @@
 
 ## Overview
 
-Ollama is an open-source large language model runtime environment that supports running various open-source models locally. Vangriten AI Swarm fully integrates with Ollama, allowing you to use various open-source AI models locally without API keys and completely free.
+Ollama is an open-source large language model runtime environment that supports running various open-source models locally. Van Fleet Load AI Swarm fully integrates with Ollama, allowing you to use various open-source AI models locally without API keys and completely free.
 
 ## Features
 

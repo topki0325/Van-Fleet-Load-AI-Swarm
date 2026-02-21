@@ -1,16 +1,16 @@
-# Vangriten AI Swarm - 核心架构
+# Van Fleet Load AI Swarm - 核心架构
 
 ## 概述
 
-Vangriten AI Swarm 是一个用 Rust 构建的高并发 AI 蜂群框架，旨在协调多个 AI 代理在协作工作流中的执行。该框架实现了"加特林机枪"式的旋转调度系统，用于高效的多代理执行，实现自主 AI 驱动的项目管理和开发周期。
+Van Fleet Load AI Swarm 是一个用 Rust 构建的高并发 AI 蜂群 framework，旨在协调多个 AI 代理在协作工作流中的执行。该框架实现了"加特林机枪"式的旋转调度系统，用于高效的多代理执行，实现自主 AI 驱动的项目管理和开发周期。
 
 ## 核心架构理念
 
-### Vangriten AI Swarm
+### Van Fleet Load AI Swarm
 
-- **V = Vangriten**：核心架构理念，强调自主 AI 编排和涌现智能模式
-- **A = AI**：高并发旋转调度系统，用于多代理执行
-- **S = Swarm**：三层方法，结合架构设计、AI 代理管理和自主操作
+- **VFL = Van Fleet Load**：灵感来源于朝鲜战争中的火力压制战术，强调多代理的饱和火力覆盖与资源编排
+- **A = AI**：自主代理（Autonomous Agents）核心
+- **S = Swarm**：协作式 AI 代理集群（Collaborative AI Agent Swarm）
 
 ### 系统组件
 

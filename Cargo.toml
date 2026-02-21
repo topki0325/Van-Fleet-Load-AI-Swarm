@@ -2,7 +2,7 @@
 name = "vangriten-ai-swarm"
 version = "0.1.0"
 edition = "2021"
-description = "Vangriten AI Swarm - A high-concurrency AI swarm framework"
+description = "Van Fleet Load AI Swarm - A high-concurrency AI swarm framework"
 authors = ["Your Name <your.email@example.com>"]
 license = "MIT"
 autobins = false

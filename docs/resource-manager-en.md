@@ -368,4 +368,4 @@ pub struct ResourceManager {
 
 ## License
 
-Resource Manager features follow to Vangriten AI Swarm license.
+Resource Manager features follow to Van Fleet Load AI Swarm license.

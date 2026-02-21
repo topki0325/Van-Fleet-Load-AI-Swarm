@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Initial release of Vangriten AI Swarm Framework
+- Initial release of Van Fleet Load AI Swarm
 - Core AI agent orchestration system
 - Tauri-based desktop interface
 - Multi-language compilation support

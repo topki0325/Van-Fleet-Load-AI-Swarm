@@ -1,6 +1,6 @@
-# Vangriten AI Swarm - Documentation Library
+# Van Fleet Load AI Swarm - Documentation Library
 
-Welcome to the detailed documentation for the Vangriten AI Swarm framework. This documentation library aims to provide a comprehensive understanding of the system architecture, implementation details, best practices, and usage guidelines.
+Welcome to the detailed documentation for the Van Fleet Load AI Swarm framework. This documentation library aims to provide a comprehensive understanding of the system architecture, implementation details, best practices, and usage guidelines.
 
 ## Documentation Index
 

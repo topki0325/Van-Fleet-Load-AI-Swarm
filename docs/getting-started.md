@@ -2,7 +2,7 @@
 
 ## 先决条件
 
-在开始使用 Vangriten AI Swarm 之前，请确保您的系统已安装以下组件：
+在开始使用 Van Fleet Load AI Swarm 之前，请确保您的系统已安装以下组件：
 
 - **Rust 1.70+** (通过 rustup 安装)
 - **Node.js 18+** (仅在使用可选的 Tauri 前端时需要)

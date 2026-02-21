@@ -1,6 +1,6 @@
 # 项目文件架构 (System File Architecture)
 
-Vangriten AI Swarm 遵循高内聚、低耦合的模块化设计。以下是系统的核心源码文件布局及其承担的特定函数职责。
+Van Fleet Load AI Swarm 遵循高内聚、低耦合的模块化设计。以下是系统的核心源码文件布局及其承担的特定函数职责。
 
 ## 📁 源码目录详细解析
 

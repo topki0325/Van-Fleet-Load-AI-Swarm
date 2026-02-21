@@ -1,6 +1,6 @@
 # 后端核心服务 (Backend Services)
 
-Vangriten AI Swarm 后端采用分布式异步架构，所有核心模块均提供标准化的 Rust 接口集。
+Van Fleet Load AI Swarm 后端采用分布式异步架构，所有核心模块均提供标准化的 Rust 接口集。
 
 ## ⚙️ 核心基础服务 (Infrastructure Services)
 

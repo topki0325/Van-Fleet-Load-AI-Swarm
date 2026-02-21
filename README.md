@@ -1,6 +1,6 @@
 # Van Fleet Load AI Swarm
 
-[![CI](https://github.com/topki0325/Vangriten-AI-swarm/workflows/CI/badge.svg)](https://github.com/topki0325/Vangriten-AI-swarm/actions)
+[![CI](https://github.com/topki0325/Van-Fleet-Load-AI-Swarm/workflows/CI/badge.svg)](https://github.com/topki0325/Van-Fleet-Load-AI-Swarm/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 [English](#english) | [中文](#中文)
@@ -104,14 +104,14 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 
 ### 📞 Contact
 
-- Project Home: [https://github.com/topki0325/Vangriten-AI-swarm](https://github.com/topki0325/Vangriten-AI-swarm)
-- Issues: [https://github.com/topki0325/Vangriten-AI-swarm/issues](https://github.com/topki0325/Vangriten-AI-swarm/issues)
+- Project Home: [https://github.com/topki0325/Van-Fleet-Load-AI-Swarm](https://github.com/topki0325/Van-Fleet-Load-AI-Swarm)
+- Issues: [https://github.com/topki0325/Van-Fleet-Load-AI-Swarm/issues](https://github.com/topki0325/Van-Fleet-Load-AI-Swarm/issues)
 
 ---
 
 ## 中文
 
-Van Fleet Load AI Swarm 是一个高并发 AI 蜂群框架，基于 Rust 构建，旨在协调多个 AI 代理进行协作开发。
+Van Fleet Load AI Swarm 是一个高并发 AI 蜂群架构，基于 Rust 构建，旨在协调多个 AI 代理来进行协作开发。
 
 ### ✨ 特性
 
@@ -207,5 +207,5 @@ cargo tauri dev
 
 ### 📞 联系
 
-- 项目主页: [https://github.com/topki0325/Vangriten-AI-swarm](https://github.com/topki0325/Vangriten-AI-swarm)
-- Issues: [https://github.com/topki0325/Vangriten-AI-swarm/issues](https://github.com/topki0325/Vangriten-AI-swarm/issues)
+- 项目主页: [https://github.com/topki0325/Van-Fleet-Load-AI-Swarm](https://github.com/topki0325/Van-Fleet-Load-AI-Swarm)
+- Issues: [https://github.com/topki0325/Van-Fleet-Load-AI-Swarm/issues](https://github.com/topki0325/Van-Fleet-Load-AI-Swarm/issues)

@@ -68,7 +68,7 @@ impl ApiKeyManager {
 
 ## 3. 分布式：mDNS 发现与资源协同 (Distributed Discovery)
 
-Vangriten AI Swarm 能够自动将同一局域网内的其它节点转化为计算单元（Slaves），实现算力的弹性伸缩。
+Van Fleet Load AI Swarm 能够自动将同一局域网内的其它节点转化为计算单元（Slaves），实现算力的弹性伸缩。
 
 ```rust
 // 局域网算力节点自动挂载

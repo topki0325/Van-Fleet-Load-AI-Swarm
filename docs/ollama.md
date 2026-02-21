@@ -2,7 +2,7 @@
 
 ## 概述
 
-Ollama 是一个开源的大语言模型运行环境，支持在本地运行多种开源模型。Vangriten AI Swarm 完整集成了 Ollama，允许您在本地使用各种开源 AI 模型，无需 API 密钥，完全免费。
+Ollama 是一个开源的大语言模型运行环境，支持在本地运行多种开源模型。Van Fleet Load AI Swarm 完整集成了 Ollama，允许您在本地使用各种开源 AI 模型，无需 API 密钥，完全免费。
 
 ## 功能特性
 

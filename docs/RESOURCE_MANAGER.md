@@ -1,6 +1,6 @@
 # 资源管理器 (Resource Manager)
 
-独立的资源管理CLI工具，用于管理Vangriten AI Swarm的分布式计算资源。
+独立的资源管理CLI工具，用于管理 Van Fleet Load AI Swarm 的分布式计算资源。
 
 ## 快速开始
 
