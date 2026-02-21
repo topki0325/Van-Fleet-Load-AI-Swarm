@@ -1,6 +1,6 @@
 #[cfg(not(feature = "native-gui"))]
 fn main() {
-    eprintln!("Native GUI is disabled. Re-run with: cargo run --features native-gui --bin vga-gui");
+    eprintln!("Native GUI is disabled. Re-run with: cargo run --features native-gui --bin vgs");
 }
 
 #[cfg(feature = "native-gui")]
@@ -757,11 +757,17 @@ impl eframe::App for VgaGuiApp {
                     ui.heading(self.tr("API 提供商", "API Providers"));
 
                     ui.horizontal(|ui| {
-                        ui.label(self.tr("筛选：", "Filter:"));
-                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::All, self.tr("全部", "All"));
-                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::China, self.tr("中国", "China"));
-                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::USA, self.tr("美国", "USA"));
-                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::Global, self.tr("全球", "Global"));
+                        let label_filter = self.tr("筛选：", "Filter:");
+                        let label_all = self.tr("全部", "All");
+                        let label_china = self.tr("中国", "China");
+                        let label_usa = self.tr("美国", "USA");
+                        let label_global = self.tr("全球", "Global");
+
+                        ui.label(label_filter);
+                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::All, label_all);
+                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::China, label_china);
+                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::USA, label_usa);
+                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::Global, label_global);
 
                         if ui.button(self.tr("加载", "Load")).clicked() {
                             self.load_providers();
@@ -796,6 +802,7 @@ impl eframe::App for VgaGuiApp {
                     ui.heading(self.tr("资源管理", "Resources"));
 
                     ui.horizontal(|ui| {
+                        let label_allow_remote = self.tr("允许远程", "Allow remote");
                         if ui.button(self.tr("发现节点", "Discover Nodes")).clicked() {
                             self.discover_nodes();
                         }
@@ -808,25 +815,28 @@ impl eframe::App for VgaGuiApp {
                         if ui.button(self.tr("应用远程开关", "Set Remote Status")).clicked() {
                             self.set_remote_access();
                         }
-                        ui.checkbox(&mut self.allow_remote_access, self.tr("允许远程", "Allow remote"));
+                        ui.checkbox(&mut self.allow_remote_access, label_allow_remote);
                     });
 
                     ui.horizontal(|ui| {
                         ui.label(self.tr("策略", "Strategy"));
+                        let label_least_loaded = self.tr("最小负载", "LeastLoaded");
+                        let label_round_robin = self.tr("轮询", "RoundRobin");
+                        let label_random = self.tr("随机", "Random");
                         ui.selectable_value(
                             &mut self.balancing_strategy,
                             vangriten_ai_swarm::shared::models::BalancingStrategy::LeastLoaded,
-                            self.tr("最小负载", "LeastLoaded"),
+                            label_least_loaded,
                         );
                         ui.selectable_value(
                             &mut self.balancing_strategy,
                             vangriten_ai_swarm::shared::models::BalancingStrategy::RoundRobin,
-                            self.tr("轮询", "RoundRobin"),
+                            label_round_robin,
                         );
                         ui.selectable_value(
                             &mut self.balancing_strategy,
                             vangriten_ai_swarm::shared::models::BalancingStrategy::Random,
-                            self.tr("随机", "Random"),
+                            label_random,
                         );
 
                         if ui.button(self.tr("设置", "Set")).clicked() {
@@ -889,17 +899,38 @@ impl eframe::App for VgaGuiApp {
                         ui.label(self.tr("任务类型", "Task type"));
                         ui.text_edit_singleline(&mut self.req_task_type);
                         ui.label(self.tr("优先级", "Priority"));
-                        ui.selectable_value(&mut self.req_priority, vangriten_ai_swarm::shared::models::Priority::Low, self.tr("低", "Low"));
-                        ui.selectable_value(&mut self.req_priority, vangriten_ai_swarm::shared::models::Priority::Medium, self.tr("中", "Medium"));
-                        ui.selectable_value(&mut self.req_priority, vangriten_ai_swarm::shared::models::Priority::High, self.tr("高", "High"));
-                        ui.selectable_value(&mut self.req_priority, vangriten_ai_swarm::shared::models::Priority::Critical, self.tr("紧急", "Critical"));
+                        let label_priority_low = self.tr("低", "Low");
+                        let label_priority_medium = self.tr("中", "Medium");
+                        let label_priority_high = self.tr("高", "High");
+                        let label_priority_critical = self.tr("紧急", "Critical");
+                        ui.selectable_value(
+                            &mut self.req_priority,
+                            vangriten_ai_swarm::shared::models::Priority::Low,
+                            label_priority_low,
+                        );
+                        ui.selectable_value(
+                            &mut self.req_priority,
+                            vangriten_ai_swarm::shared::models::Priority::Medium,
+                            label_priority_medium,
+                        );
+                        ui.selectable_value(
+                            &mut self.req_priority,
+                            vangriten_ai_swarm::shared::models::Priority::High,
+                            label_priority_high,
+                        );
+                        ui.selectable_value(
+                            &mut self.req_priority,
+                            vangriten_ai_swarm::shared::models::Priority::Critical,
+                            label_priority_critical,
+                        );
                     });
                     ui.horizontal(|ui| {
+                        let label_gpu_required = self.tr("需要GPU", "GPU");
                         ui.label(self.tr("CPU cores", "CPU cores"));
                         ui.text_edit_singleline(&mut self.req_cpu_cores);
                         ui.label(self.tr("内存MB", "Memory MB"));
                         ui.text_edit_singleline(&mut self.req_memory_mb);
-                        ui.checkbox(&mut self.req_gpu_required, self.tr("需要GPU", "GPU"));
+                        ui.checkbox(&mut self.req_gpu_required, label_gpu_required);
                         ui.label(self.tr("GPU MB", "GPU MB"));
                         ui.text_edit_singleline(&mut self.req_gpu_memory_mb);
                     });

@@ -32,7 +32,7 @@ pub struct ResourceManager {
 impl ResourceManager {
     pub async fn new(allow_remote: bool) -> Result<Self, VgaError> {
         let node_id = Uuid::new_v4().to_string();
-        let broadcast_port = 8080;
+        let broadcast_port = Self::find_available_port(8080, 8100).await?;
         
         let node_info = NodeInfo {
             id: node_id.clone(),
@@ -110,6 +110,16 @@ impl ResourceManager {
         vec![]
     }
 
+    async fn find_available_port(start: u16, end: u16) -> Result<u16, VgaError> {
+        for port in start..=end {
+            if let Ok(_socket) = UdpSocket::bind(format!("0.0.0.0:{}", port)).await {
+                drop(_socket);
+                return Ok(port);
+            }
+        }
+        Err(VgaError::ResourceLimit(format!("No available port in range {}-{}", start, end)))
+    }
+
     pub async fn start_discovery(&self) -> Result<(), VgaError> {
         tracing::info!(
             "Starting resource discovery for {} on port {}",
@@ -181,6 +191,30 @@ impl ResourceManager {
                     if let Ok(data) = serde_json::to_vec(&message) {
                         let _ = socket_broadcast.send_to(&data, "255.255.255.255:8080").await;
                     }
+                }
+            }
+        });
+
+        let discovered_nodes_cleanup = self.discovered_nodes.clone();
+        tokio::spawn(async move {
+            let mut interval = tokio::time::interval(Duration::from_secs(60));
+            
+            loop {
+                interval.tick().await;
+                let now = Utc::now();
+                let mut nodes = discovered_nodes_cleanup.write().await;
+                let mut to_remove = Vec::new();
+                
+                for (node_id, node) in nodes.iter() {
+                    let timeout = chrono::Duration::minutes(5);
+                    if now.signed_duration_since(node.last_seen) > timeout {
+                        to_remove.push(node_id.clone());
+                        tracing::warn!("Removing stale node: {}", node_id);
+                    }
+                }
+                
+                for node_id in to_remove {
+                    nodes.remove(&node_id);
                 }
             }
         });
@@ -362,11 +396,32 @@ impl ResourceManager {
         let cpu_cores = requirements.cpu_cores.unwrap_or(1);
         let memory_mb = requirements.memory_mb.unwrap_or(1024);
 
+        if cpu_cores > node.resources.cpu_cores {
+            return Err(VgaError::ResourceLimit(format!(
+                "Insufficient CPU: requested {}, available {}", 
+                cpu_cores, node.resources.cpu_cores
+            )));
+        }
+
+        if memory_mb > node.resources.available_memory_mb {
+            return Err(VgaError::ResourceLimit(format!(
+                "Insufficient memory: requested {} MB, available {} MB", 
+                memory_mb, node.resources.available_memory_mb
+            )));
+        }
+
         let gpu = if requirements.gpu_required {
             if let Some(gpu) = node.resources.gpus.first() {
+                let gpu_memory = requirements.gpu_memory_mb.unwrap_or(gpu.available_memory_mb);
+                if gpu_memory > gpu.available_memory_mb {
+                    return Err(VgaError::ResourceLimit(format!(
+                        "Insufficient GPU memory: requested {} MB, available {} MB", 
+                        gpu_memory, gpu.available_memory_mb
+                    )));
+                }
                 Some(AllocatedGpu {
                     gpu_id: gpu.id.clone(),
-                    memory_mb: requirements.gpu_memory_mb.unwrap_or(gpu.available_memory_mb),
+                    memory_mb: gpu_memory,
                 })
             } else {
                 return Err(VgaError::ResourceLimit("GPU required but not available".into()));

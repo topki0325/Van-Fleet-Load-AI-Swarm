@@ -126,10 +126,15 @@ async fn run_interactive() {
                 let name = name.trim();
 
                 print!("Enter max members: ");
-                io::stdout().flush().unwrap();
+                io::stdout().flush().expect("Failed to flush stdout");
                 let mut max = String::new();
                 io::stdin().read_line(&mut max).expect("Failed to read input");
-                let max_members: usize = max.trim().parse().unwrap_or(10);
+                let max_members: usize = max.trim().parse().unwrap_or(10).min(1000);
+
+                if max_members == 0 {
+                    println!("Error: max members must be at least 1");
+                    continue;
+                }
 
                 match resource_manager.create_swarm_group(name.to_string(), max_members).await {
                     Ok(group_id) => println!("Created group: {}", group_id),
@@ -138,19 +143,24 @@ async fn run_interactive() {
             }
             "request" => {
                 print!("Enter CPU cores (default: 2): ");
-                io::stdout().flush().unwrap();
+                io::stdout().flush().expect("Failed to flush stdout");
                 let mut cpu = String::new();
                 io::stdin().read_line(&mut cpu).expect("Failed to read input");
-                let cpu_cores: Option<u32> = cpu.trim().parse().ok();
+                let cpu_cores: Option<u32> = cpu.trim().parse().ok().filter(|&x| x > 0 && x <= 128);
 
                 print!("Enter memory in MB (default: 4096): ");
-                io::stdout().flush().unwrap();
+                io::stdout().flush().expect("Failed to flush stdout");
                 let mut mem = String::new();
                 io::stdin().read_line(&mut mem).expect("Failed to read input");
-                let memory_mb: Option<u64> = mem.trim().parse().ok();
+                let memory_mb: Option<u64> = mem.trim().parse().ok().filter(|&x| x >= 512 && x <= 1024 * 1024);
+
+                if cpu_cores.is_none() || memory_mb.is_none() {
+                    println!("Error: Invalid input values");
+                    continue;
+                }
 
                 print!("GPU required? (y/n, default: n): ");
-                io::stdout().flush().unwrap();
+                io::stdout().flush().expect("Failed to flush stdout");
                 let mut gpu = String::new();
                 io::stdin().read_line(&mut gpu).expect("Failed to read input");
                 let gpu_required = gpu.trim().to_lowercase() == "y";
@@ -193,7 +203,7 @@ async fn run_interactive() {
             }
             "set-strategy" => {
                 print!("Enter strategy number (1-5): ");
-                io::stdout().flush().unwrap();
+                io::stdout().flush().expect("Failed to flush stdout");
                 let mut strat = String::new();
                 io::stdin().read_line(&mut strat).expect("Failed to read input");
                 
@@ -216,7 +226,7 @@ async fn run_interactive() {
                 let status = resource_manager.get_remote_access_status().await;
                 println!("Remote access: {}", status);
                 print!("Toggle remote access? (y/n): ");
-                io::stdout().flush().unwrap();
+                io::stdout().flush().expect("Failed to flush stdout");
                 let mut ans = String::new();
                 io::stdin().read_line(&mut ans).expect("Failed to read input");
                 
@@ -227,7 +237,7 @@ async fn run_interactive() {
             }
             "health" => {
                 print!("Enter node ID: ");
-                io::stdout().flush().unwrap();
+                io::stdout().flush().expect("Failed to flush stdout");
                 let mut node_id = String::new();
                 io::stdin().read_line(&mut node_id).expect("Failed to read input");
                 
@@ -245,6 +255,7 @@ async fn run_interactive() {
             }
             "clear" => {
                 print!("\x1B[2J\x1B[1;1H");
+                io::stdout().flush().expect("Failed to flush stdout");
                 println!("╔════════════════════════════════════════════════════════════╗");
                 println!("║     Vangriten AI Swarm - Resource Manager CLI              ║");
                 println!("╚════════════════════════════════════════════════════════════╝");

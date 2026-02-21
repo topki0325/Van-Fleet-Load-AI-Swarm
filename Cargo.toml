@@ -79,7 +79,7 @@ tauri-build = { version = "1.5", features = [] }
 native-gui = ["eframe"]
 
 [[bin]]
-name = "vga-gui"
+name = "vgs"
 path = "src/bin/vga_gui.rs"
 
 [[bin]]
