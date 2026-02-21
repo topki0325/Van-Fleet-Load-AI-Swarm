@@ -20,9 +20,13 @@
 ## 功能模块文档
 
 - [API 密钥管理](api-key-management.md)：管理多个 AI 服务提供商的 API 密钥，支持加密存储和使用统计。
+  - [English Version](api-key-management-en.md)
 - [资源管理代理](resource-manager.md)：局域网内 AI 模型资源发现、分布式 GPU 资源分配、网络负载均衡等功能。
+  - [English Version](resource-manager-en.md)
 - [C 语言编译环境管理](c-compiler.md)：GCC 实例自动发现、轮流编译、并行编译等功能。
+  - [English Version](c-compiler-en.md)
 - [Ollama 集成](ollama.md)：在本地运行多种开源 AI 模型，支持聊天、文本生成和向量嵌入。
+  - [English Version](ollama-en.md)
 
 ## 其他重要文件
 
