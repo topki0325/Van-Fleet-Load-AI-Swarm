@@ -1,6 +1,6 @@
 # 技术实现 (Technical Implementation)
 
-### 1. 高并发：加特林旋转调度系统 (Gatling Rotation)
+## 1. 高并发：加特林旋转调度系统 (Gatling Rotation)
 
 Gatling 调度器利用 Rust 的原子操作实现无锁负载均衡，确保在数千个并发任务下依然保持微秒级的分配延迟。
 
@@ -36,7 +36,7 @@ impl AgentScheduler {
 }
 ```
 
-### 2. 安全：AES-256-GCM 密钥金库 (Secure Vault)
+## 2. 安全：AES-256-GCM 密钥金库 (Secure Vault)
 
 所有第三方提供商（如 OpenAI, Anthropic）的 API 密钥均通过硬件级加密算法存储，且仅在内存中短暂解密。
 
@@ -49,7 +49,7 @@ struct ApiKeyManager {
 
 impl ApiKeyManager {
     /// 统一金库操作入口
-    fn vault_operation(&self, op: VaultOp) -> Result<VaultResult, VgasError> {
+    fn vault_operation(&self, op: VaultOp) -> Result<VaultResult, VgaError> {
         match op {
             VaultOp::Store { provider, key } => {
                 let encrypted = self.encrypt_key(key)?;
@@ -66,9 +66,9 @@ impl ApiKeyManager {
 }
 ```
 
-### 3. 分布式：mDNS 发现与资源协同 (Distributed Discovery)
+## 3. 分布式：mDNS 发现与资源协同 (Distributed Discovery)
 
-Vangriten Gatling AI Swarm (VGAS) 能够自动将同一局域网内的其它 VGAS 节点转化为计算单元（Slaves），实现算力的弹性伸缩。
+Vangriten AI Swarm 能够自动将同一局域网内的其它节点转化为计算单元（Slaves），实现算力的弹性伸缩。
 
 ```rust
 // 局域网算力节点自动挂载
@@ -83,7 +83,7 @@ impl NetworkDiscovery {
         let service_info = ServiceInfo::new(
             "_vgas._tcp.local.",
             &self.node_id,
-            "vgas.local.",
+            "vai.local.",
             self.get_current_ip(),
             8080,
             self.mode.into_properties(),
@@ -93,4 +93,3 @@ impl NetworkDiscovery {
     }
 }
 ```
->,filePath:

@@ -1,9 +1,9 @@
-# Vangriten Gatling AI Swarm (VGAS)
+# Vangriten AI Swarm
 
-[![CI](https://github.com/topki0325/Vangriten-Gatling-AI-swarm/workflows/CI/badge.svg)](https://github.com/topki0325/Vangriten-Gatling-AI-swarm/actions)
+[![CI](https://github.com/topki0325/Vangriten-AI-swarm/workflows/CI/badge.svg)](https://github.com/topki0325/Vangriten-AI-swarm/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Vangriten Gatling AI Swarm (VGAS) 是一个高并发 AI 蜂群框架，基于 Rust 构建，旨在协调多个 AI 代理进行协作开发。
+Vangriten AI Swarm 是一个高并发 AI 蜂群框架，基于 Rust 构建，旨在协调多个 AI 代理进行协作开发。
 
 ## ✨ 特性
 
@@ -16,7 +16,7 @@ Vangriten Gatling AI Swarm (VGAS) 是一个高并发 AI 蜂群框架，基于 Ru
 
 ## 🏗️ 架构
 
-```
+```text
 VGA = Vangriten Gatling AI
 ├── V = Vangriten (自主 AI 编排)
 ├── G = Gatling (高并发旋转调度)
@@ -72,5 +72,5 @@ cargo tauri dev
 
 ## 📞 联系
 
-- 项目主页: https://github.com/topki0325/Vangriten-Gatling-AI-swarm
-- Issues: https://github.com/topki0325/Vangriten-Gatling-AI-swarm/issues
+- 项目主页: [https://github.com/topki0325/Vangriten-AI-swarm](https://github.com/topki0325/Vangriten-AI-swarm)
+- Issues: [https://github.com/topki0325/Vangriten-AI-swarm/issues](https://github.com/topki0325/Vangriten-AI-swarm/issues)

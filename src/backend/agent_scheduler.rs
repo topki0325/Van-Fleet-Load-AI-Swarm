@@ -259,8 +259,8 @@ impl AgentScheduler {
                             Ok(_) => TaskStatus::Completed,
                             Err(_) => TaskStatus::Failed,
                         };
-                        task.output = match result {
-                            Ok(output) => crate::shared::models::TaskResult::Success(output),
+                        task.output = match &result {
+                            Ok(output) => crate::shared::models::TaskResult::Success(output.clone()),
                             Err(e) => crate::shared::models::TaskResult::Failure(format!("{:?}", e)),
                         };
                         task.updated_at = Utc::now();

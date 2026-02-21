@@ -51,12 +51,14 @@ async fn setup_backend_services() -> backend::BackendServices {
     let agent_scheduler = backend::AgentScheduler::new().await;
     let network_discovery = backend::NetworkDiscovery::new().await;
     let compilation_scheduler = backend::CompilationScheduler::new().await;
+    let resource_manager = backend::ResourceManager::new(true).await.unwrap();
 
     backend::BackendServices {
         api_manager,
         agent_scheduler,
         network_discovery,
         compilation_scheduler,
+        resource_manager,
         projects: Arc::new(RwLock::new(Vec::new())),
         leases: Arc::new(RwLock::new(Vec::new())),
     }

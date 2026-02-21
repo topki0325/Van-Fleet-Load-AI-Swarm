@@ -1,6 +1,6 @@
-# VGA (Vangriten Gatling AI)swarm - 蜂群框架文档库
+# Vangriten AI Swarm - 蜂群框架文档库
 
-欢迎阅读 VGA (Vangriten Gatling AI)swarm 框架的详细文档。本文档库旨在提供对系统架构、实现细节、最佳实践以及使用指南的全面了解。
+欢迎阅读 Vangriten AI Swarm 框架的详细文档。本文档库旨在提供对系统架构、实现细节、最佳实践以及使用指南的全面了解。
 
 ## 文档目录
 

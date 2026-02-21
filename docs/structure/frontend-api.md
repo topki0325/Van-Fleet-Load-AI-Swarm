@@ -5,16 +5,19 @@ VGA (Vangriten Gatling AI)swarm 前端通过 Tauri 提供的强类型跨语言�
 ## 🖥️ 核心前端组件说明 (Frontend Components)
 
 ### 1. `App` (应用全局管理器)
+
 - **`pub async fn initialize() -> AppContext`**: 应用初始化，完成日志等级设定与后端握手。
 - **`pub fn on_route_change(new_route: RoutePath)`**: 处理单页应用的路由切换逻辑（如项目管理、资源看板等）。
 - **`pub fn toggle_mode(m: ClientMode)`**: 响应用户切换 Master/Slave 模式，并触发界面的重渲染。
 
 ### 2. `ProjectView` (项目可视化器)
+
 - **`pub fn render_workflow_tree(p: &Project)`**: 渲染多代理协作的 DAG 树状工作流界面。
 - **`pub async fn sync_agent_output(t: TaskId) -> OutputEntry`**: 订阅后端推送的代理任务输出文本流。
 - **`pub fn handle_manual_intervention(conflict: ConflictInfo)`**: 在多代理合并代码产生冲突时弹窗提示并捕获人工决策结果。
 
 ### 3. `AgentMonitor` (实时看板)
+
 - **`pub fn update_swarm_pulse(p: PulseStatus)`**: 持续消耗后端推送的蜂群存活、负载指标数据。
 - **`pub fn render_provider_metrics(p: Provider)`**: 显示特定 AI 提供商（如 OpenAI, Anthropic）的实时 QPS、Token 消耗率曲线图。
 - **`pub fn show_gpu_utilization(node_id: &str)`**: 可视化特定节点的 GPU 热力度。
@@ -29,11 +32,11 @@ VGA (Vangriten Gatling AI)swarm 前端通过 Tauri 提供的强类型跨语言�
 | :--- | :--- | :--- | :--- |
 | `cmd_get_billing` | `provider: string` | `BillingReport` | 基于 `ApiKeyManager::update_usage_stats` 获取财务数据。 |
 | `cmd_vault_op` | `op: VaultOp` | `VaultResult` | 通用的密钥金库管理，前端映射为配置页面的 CRUD 操作。 |
-| `cmd_deploy_project`| `config: ProjectConfig`| `ProjectResult` | 调用 `AgentScheduler::dispatch_task` 初始化整蜂群任务流。 |
-| `cmd_node_discovery`| 无 | `Vec<PeerStatus>` | 触发 `NetworkDiscovery::broadcast_presence` 并返回扫描列表。 |
-| `cmd_get_all_agents`| 无 | `Vec<Agent>` | 获取集群内所有 `Agent` 实体的生存指标与当前任务快照。 |
-| `cmd_request_compute`| `req: ComputeReq` | `ResourceLease` | 调用 `ResourceManager::acquire_cluster_gpu` 预订算力资源。 |
-| `cmd_force_terminate`| `task_id: string` | `Result<bool, VgaError>` | 强制中断特定的 `Task` 及其关联的子任务链。 |
+| `cmd_deploy_project` | `config: ProjectConfig` | `ProjectResult` | 调用 `AgentScheduler::dispatch_task` 初始化整蜂群任务流。 |
+| `cmd_node_discovery` | 无 | `Vec<PeerStatus>` | 触发 `NetworkDiscovery::broadcast_presence` 并返回扫描列表。 |
+| `cmd_get_all_agents` | 无 | `Vec<Agent>` | 获取集群内所有 `Agent` 实体的生存指标与当前任务快照。 |
+| `cmd_request_compute` | `req: ComputeReq` | `ResourceLease` | 调用 `ResourceManager::acquire_cluster_gpu` 预订算力资源。 |
+| `cmd_force_terminate` | `task_id: string` | `Result<bool, VgaError>` | 强制中断特定的 `Task` 及其关联的子任务链。 |
 
 ---
 

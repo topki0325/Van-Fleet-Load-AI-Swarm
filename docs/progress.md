@@ -18,6 +18,7 @@
 - 增加最小前端资源 `dist/index.html`，让 app 能跑起来并显示数据
 
 ### 2) 后端服务骨架（可被前端调用）
+
 - **AgentScheduler**
   - 默认注册 3 个 agent（Architect / Programmer / Environment）用于演示
   - 支持列出 agents、查询 swarm 状态

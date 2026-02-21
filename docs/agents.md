@@ -1,6 +1,6 @@
 # 代理角色和能力
 
-### 核心代理类型 (可扩展到 100+ 实例)
+## 核心代理类型 (可扩展到 100+ 实例)
 
 1. **架构师代理**
    - 系统设计和架构规划
@@ -37,14 +37,28 @@
 6. **资源管理代理**
    - 发现和调用局域网内AI模型资源
    - 管理分布式GPU计算资源分配
-   - 网络资源负载均衡 and 优化
+   - 网络资源负载均衡与优化
    - 远程资源监控和健康检查
-   - 跨节点任务调度 and 结果聚合
+   - 跨节点任务调度与结果聚合
+   - 子模块建议：
+     - 资源发现器（mDNS/静态清单）
+     - 资源目录与租约管理
+     - 负载评估与调度策略
+     - 节点健康探测与隔离
 
-### 代理通信协议
+## 代理通信协议
 
 - **消息总线**：用于代理间通信的异步 Rust 通道
 - **状态同步**：基于 CRDT 的状态管理以确保一致性
 - **冲突解决**：基于投票的共识以解决冲突输出
 - **反馈循环**：从成功/失败执行中学习强化学习
->,filePath:
+
+### 消息类型示例
+
+- `HEARTBEAT`: `{ agent_id, status, cpu, memory, timestamp }`
+- `TASK_CLAIM`: `{ task_id, agent_id, priority, timestamp }`
+- `TASK_RESULT`: `{ task_id, status, output_ref, duration_ms }`
+- `RESOURCE_OFFER`: `{ node_id, gpu_mb, cpu_cores, ttl_ms }`
+- `RESOURCE_LEASE`: `{ lease_id, task_id, node_id, expires_at }`
+- `RESOURCE_RELEASE`: `{ lease_id, node_id, reason }`
+- `HEALTH_REPORT`: `{ node_id, health, incidents, timestamp }`

@@ -67,6 +67,45 @@
         <button id="execute">Execute</button>
       </div>
       <pre id="task-output">(not executed)</pre>
+
+      <h2>Task Lifecycle</h2>
+      <div>
+        <label>
+          Priority:
+          <select id="task-priority">
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+            <option value="Critical">Critical</option>
+          </select>
+        </label>
+        <label>
+          Snapshot Path:
+          <input id="task-snapshot" value="snapshots/placeholder.json" />
+        </label>
+        <button id="submit-task">Submit Task</button>
+      </div>
+      <div>
+        <label>
+          Task ID:
+          <input id="task-id" value="" placeholder="uuid" />
+        </label>
+        <label>
+          Status Filter:
+          <select id="task-filter">
+            <option value="">All</option>
+            <option value="Pending">Pending</option>
+            <option value="Running">Running</option>
+            <option value="Completed">Completed</option>
+            <option value="Failed">Failed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </label>
+        <button id="get-task">Get</button>
+        <button id="cancel-task">Cancel</button>
+        <button id="list-tasks">List All</button>
+      </div>
+      <pre id="task-list-output">(no tasks loaded)</pre>
     </main>
 
     <script>
@@ -84,6 +123,36 @@
         el.textContent = value;
       }
 
+      function renderTasks(tasks) {
+        if (!Array.isArray(tasks)) {
+          return pretty(tasks);
+        }
+
+        const filter = document.getElementById('task-filter')?.value || '';
+        const filtered = filter
+          ? tasks.filter((task) => task.status === filter)
+          : tasks;
+
+        if (filtered.length === 0) {
+          return '(no matching tasks)';
+        }
+
+        return filtered
+          .map((task) => {
+            const status = task.status || 'Unknown';
+            const id = task.id || 'n/a';
+            const target = task.spec?.target || 'n/a';
+            const language = task.spec?.language || 'n/a';
+            const updated = task.updated_at || task.created_at || 'n/a';
+            return [
+              `[${status}] ${id}`,
+              `  target=${target} language=${language}`,
+              `  updated=${updated}`,
+            ].join('\n');
+          })
+          .join('\n\n');
+      }
+
       async function getInvoke() {
         const tauri = window.__TAURI__ && window.__TAURI__.tauri;
         if (!tauri || typeof tauri.invoke !== 'function') {
@@ -95,17 +164,19 @@
       async function refreshAll() {
         const invoke = await getInvoke();
 
-        const [swarm, agents, projects, leases] = await Promise.all([
+        const [swarm, agents, projects, leases, tasks] = await Promise.all([
           invoke('cmd_get_swarm_status'),
           invoke('cmd_get_all_agents'),
           invoke('cmd_list_projects'),
           invoke('cmd_list_leases'),
+          invoke('cmd_list_tasks'),
         ]);
 
         setText('swarm', pretty(swarm));
         setText('agents', pretty(agents));
         setText('projects', pretty(projects));
         setText('leases', pretty(leases));
+        setText('task-list-output', renderTasks(tasks));
       }
 
       async function deploySampleProject() {
@@ -145,6 +216,45 @@
         await refreshAll();
       }
 
+      async function submitTask() {
+        const invoke = await getInvoke();
+        const language = document.getElementById('task-language')?.value || 'rust';
+        const target = document.getElementById('task-target')?.value || 'code';
+        const context_range = document.getElementById('task-context')?.value || '';
+        const priority = document.getElementById('task-priority')?.value || 'Medium';
+        const input_snapshot = document.getElementById('task-snapshot')?.value || '';
+
+        const taskId = await invoke('cmd_submit_task', {
+          spec: { language, target, context_range },
+          priority,
+          input_snapshot,
+        });
+
+        setText('task-list-output', pretty({ submitted: taskId }));
+        await refreshAll();
+      }
+
+      async function getTask() {
+        const invoke = await getInvoke();
+        const task_id = document.getElementById('task-id')?.value || '';
+        const task = await invoke('cmd_get_task', { task_id });
+        setText('task-list-output', pretty(task));
+      }
+
+      async function listTasks() {
+        const invoke = await getInvoke();
+        const tasks = await invoke('cmd_list_tasks');
+        setText('task-list-output', renderTasks(tasks));
+      }
+
+      async function cancelTask() {
+        const invoke = await getInvoke();
+        const task_id = document.getElementById('task-id')?.value || '';
+        const ok = await invoke('cmd_cancel_task', { task_id });
+        setText('task-list-output', pretty({ cancelled: ok, task_id }));
+        await refreshAll();
+      }
+
       document.getElementById('refresh')?.addEventListener('click', () => {
         refreshAll().catch((e) => setText('swarm', String(e)));
       });
@@ -156,6 +266,21 @@
       });
       document.getElementById('execute')?.addEventListener('click', () => {
         executeTask().catch((e) => setText('task-output', String(e)));
+      });
+      document.getElementById('submit-task')?.addEventListener('click', () => {
+        submitTask().catch((e) => setText('task-list-output', String(e)));
+      });
+      document.getElementById('get-task')?.addEventListener('click', () => {
+        getTask().catch((e) => setText('task-list-output', String(e)));
+      });
+      document.getElementById('cancel-task')?.addEventListener('click', () => {
+        cancelTask().catch((e) => setText('task-list-output', String(e)));
+      });
+      document.getElementById('list-tasks')?.addEventListener('click', () => {
+        listTasks().catch((e) => setText('task-list-output', String(e)));
+      });
+      document.getElementById('task-filter')?.addEventListener('change', () => {
+        listTasks().catch((e) => setText('task-list-output', String(e)));
       });
 
       async function vaultStore() {

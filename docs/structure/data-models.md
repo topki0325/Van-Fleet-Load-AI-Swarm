@@ -5,8 +5,11 @@ VGA (Vangriten Gatling AI)swarm 建立了一套严谨、跨语言的对象模型
 ## 📦 核心业务实体模型 (Core Models)
 
 ### 1. `Project` (核心项目实体)
+
 定义了项目的生命周期、配置以及蜂群的协作图谱。
+
 - **数据结构**：
+
 ```rust
 struct Project {
     id: ProjectId,             // UUID
@@ -19,13 +22,17 @@ struct Project {
     last_updated: DateTime,    // 最后一次状态同步时间
 }
 ```
+
 - **关键接口**：
   - **`pub fn initialize_workflow(&mut self)`**: 根据项目配置生成初始的任务依赖图。
   - **`pub fn validate_and_snapshot(&self) -> Result<Snapshot, Error>`**: 获取当前项目状态的快照，用于持久化恢复。
 
 ### 2. `Agent` (蜂群代理个体)
+
 定义了蜂群中的工作节点，每个代理具备特定的角色属性和技能向量。
+
 - **数据结构**：
+
 ```rust
 struct Agent {
     id: AgentId,               // 分布式唯一标识符
@@ -37,13 +44,17 @@ struct Agent {
     heartbeat: Instant,        // 代理主机的最后活跃时间
 }
 ```
+
 - **关键接口**：
   - **`pub async fn execute_block(&self, code_spec: CodeSpec) -> TaskOutput`**: 代理执行一个具体的代码生成/重构原子块。
   - **`pub fn is_overloaded(&self) -> bool`**: 基于自身的容量与当前负载判断是否接收新任务。
 
 ### 3. `Task` (任务原子单位)
+
 描述了蜂群中的最小执行单元，支持嵌套的任务决策树逻辑。
+
 - **数据结构**：
+
 ```rust
 struct Task {
     id: TaskId,                // 任务 ID
@@ -56,6 +67,7 @@ struct Task {
     retry_count: u32,          // 失败尝试重试次数
 }
 ```
+
 - **关键接口**：
   - **`pub fn finalize_with_result(&mut self, res: TaskResult)`**: 标记任务完成并更新产物。
   - **`pub fn check_dependencies(&self, context: &WorkflowGraph) -> bool`**: 检查其依赖的任务是否全部就绪（Ready）。
@@ -65,7 +77,9 @@ struct Task {
 ## 🛠️ 调度与错误模型 (Orchestration & Error Handling)
 
 ### `GatlingState` (加特林负载均衡器状态)
+
 用于高并发环境下的代理快速分配与防死锁。
+
 ```rust
 struct GatlingState {
     available_pool: Arc<RwLock<Vec<AgentId>>>,
@@ -76,7 +90,9 @@ struct GatlingState {
 ```
 
 ### `VgaError` (统一错误模型)
+
 确保跨模块、跨前后端展示的一致性错误提示。
+
 ```rust
 enum VgaError {
     AuthVaultError(String),    // 获取/解密 API 密钥失败
@@ -93,6 +109,7 @@ enum VgaError {
 ## 🏛️ 行为合约 (Behavioral Contracts)
 
 ### `AgentTrait` (代理核心能力定义)
+
 所有蜂群角色必须实现的 Rust Trait。
 
 ```rust
@@ -119,6 +136,7 @@ trait AgentTrait {
 ## 📅 核心枚举与统一常量 (Common Constants)
 
 ### `AgentType` (精细角色定义)
+
 ```rust
 enum AgentType {
     ArchitectNode,   // 方案专家
@@ -131,7 +149,9 @@ enum AgentType {
 ```
 
 ### `LanguagePlatform` (多语言生态栈支持)
+
 驱动 `EnvironmentManager` 的底层工具链搜索：
+
 - `RustStack`: Cargo, Clippy, Rustfmt.
 - `PythonStack`: Conda, Pip, PyEnv.
 - `CBasedStack`: GCC, Makefile, CMake.

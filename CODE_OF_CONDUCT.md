@@ -36,7 +36,6 @@
 
 ## 归属
 
-此行为准则改编自 [Contributor Covenant][homepage]，版本 1.4，可在 https://www.contributor-covenant.org/version/1/4/code-of-conduct.html 获取
+此行为准则改编自 [Contributor Covenant][homepage]，版本 1.4，可在 [https://www.contributor-covenant.org/version/1/4/code-of-conduct.html](https://www.contributor-covenant.org/version/1/4/code-of-conduct.html) 获取
 
 [homepage]: https://www.contributor-covenant.org
->,filePath:
