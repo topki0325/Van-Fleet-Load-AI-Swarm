@@ -27,6 +27,15 @@ enum UiLang {
 }
 
 #[cfg(feature = "native-gui")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ProviderFilter {
+    All,
+    China,
+    USA,
+    Global,
+}
+
+#[cfg(feature = "native-gui")]
 struct VgaGuiApp {
     runtime: tokio::runtime::Runtime,
     services: std::sync::Arc<vangriten_ai_swarm::backend::BackendServices>,
@@ -41,6 +50,27 @@ struct VgaGuiApp {
     vault_provider: String,
     vault_key: String,
 
+    provider_filter: ProviderFilter,
+    provider_id: String,
+
+    // Resource manager inputs
+    allow_remote_access: bool,
+    group_name: String,
+    group_max_members: usize,
+    group_id: String,
+    node_id: String,
+    pool_name: String,
+    pool_node_ids_csv: String,
+    allocation_id: String,
+    req_task_type: String,
+    req_priority: vangriten_ai_swarm::shared::models::Priority,
+    req_cpu_cores: String,
+    req_memory_mb: String,
+    req_gpu_required: bool,
+    req_gpu_memory_mb: String,
+    req_preferred_models_csv: String,
+    balancing_strategy: vangriten_ai_swarm::shared::models::BalancingStrategy,
+
     // View state
     last_error: Option<String>,
     swarm_json: String,
@@ -50,6 +80,10 @@ struct VgaGuiApp {
     tasks_json: String,
     vault_json: String,
     peers_json: String,
+
+    providers_json: String,
+    provider_config_json: String,
+    resource_json: String,
 
     auto_refresh: bool,
     refresh_interval_secs: u64,
@@ -100,6 +134,26 @@ impl VgaGuiApp {
             vault_provider: "openai".to_string(),
             vault_key: String::new(),
 
+            provider_filter: ProviderFilter::All,
+            provider_id: "openai".to_string(),
+
+            allow_remote_access: false,
+            group_name: "demo".to_string(),
+            group_max_members: 10,
+            group_id: String::new(),
+            node_id: String::new(),
+            pool_name: "pool".to_string(),
+            pool_node_ids_csv: String::new(),
+            allocation_id: String::new(),
+            req_task_type: "distributed".to_string(),
+            req_priority: vangriten_ai_swarm::shared::models::Priority::Medium,
+            req_cpu_cores: "1".to_string(),
+            req_memory_mb: "1024".to_string(),
+            req_gpu_required: false,
+            req_gpu_memory_mb: "".to_string(),
+            req_preferred_models_csv: "".to_string(),
+            balancing_strategy: vangriten_ai_swarm::shared::models::BalancingStrategy::LeastLoaded,
+
             last_error: None,
             swarm_json: "(not loaded)".to_string(),
             agents_json: "(not loaded)".to_string(),
@@ -108,6 +162,10 @@ impl VgaGuiApp {
             tasks_json: "(not loaded)".to_string(),
             vault_json: "(not loaded)".to_string(),
             peers_json: "(not loaded)".to_string(),
+
+            providers_json: "(not loaded)".to_string(),
+            provider_config_json: "(not loaded)".to_string(),
+            resource_json: "(not loaded)".to_string(),
 
             auto_refresh: true,
             refresh_interval_secs: 3,
@@ -312,6 +370,267 @@ impl VgaGuiApp {
             Err(e) => self.set_error(format!("discover_peers failed: {e:?}")),
         }
     }
+
+    fn load_providers(&mut self) {
+        self.clear_error();
+
+        let res = self
+            .services
+            .api_manager
+            .vault_operation(vangriten_ai_swarm::shared::models::VaultOp::GetProviders);
+
+        match res {
+            Ok(vangriten_ai_swarm::shared::models::VaultResult::ProviderConfigs(list)) => {
+                let filtered: Vec<_> = match self.provider_filter {
+                    ProviderFilter::All => list,
+                    ProviderFilter::China => list
+                        .into_iter()
+                        .filter(|p| p.region == vangriten_ai_swarm::shared::models::ProviderRegion::China)
+                        .collect(),
+                    ProviderFilter::USA => list
+                        .into_iter()
+                        .filter(|p| p.region == vangriten_ai_swarm::shared::models::ProviderRegion::USA)
+                        .collect(),
+                    ProviderFilter::Global => list
+                        .into_iter()
+                        .filter(|p| p.region == vangriten_ai_swarm::shared::models::ProviderRegion::Global)
+                        .collect(),
+                };
+                self.providers_json = Self::pretty(&filtered);
+            }
+            Ok(other) => self.set_error(format!("Unexpected result: {other:?}")),
+            Err(e) => self.set_error(format!("load providers failed: {e:?}")),
+        }
+    }
+
+    fn get_provider_config(&mut self) {
+        self.clear_error();
+        let op = vangriten_ai_swarm::shared::models::VaultOp::GetProviderConfig {
+            provider: self.provider_id.clone(),
+        };
+        match self.services.api_manager.vault_operation(op) {
+            Ok(vangriten_ai_swarm::shared::models::VaultResult::ProviderConfig(cfg)) => {
+                self.provider_config_json = Self::pretty(&cfg);
+            }
+            Ok(other) => self.set_error(format!("Unexpected result: {other:?}")),
+            Err(e) => self.set_error(format!("get provider config failed: {e:?}")),
+        }
+    }
+
+    fn set_default_provider(&mut self) {
+        self.clear_error();
+        let op = vangriten_ai_swarm::shared::models::VaultOp::SetDefaultProvider {
+            provider: self.provider_id.clone(),
+        };
+        match self.services.api_manager.vault_operation(op) {
+            Ok(vangriten_ai_swarm::shared::models::VaultResult::DefaultProvider(p)) => {
+                self.provider_config_json = format!("Default provider set: {p}\n\n{}", self.provider_config_json);
+            }
+            Ok(other) => self.set_error(format!("Unexpected result: {other:?}")),
+            Err(e) => self.set_error(format!("set default provider failed: {e:?}")),
+        }
+    }
+
+    fn discover_nodes(&mut self) {
+        self.clear_error();
+        let services = self.services.clone();
+        let res = self.runtime.block_on(async move { services.resource_manager.discover_nodes().await });
+        match res {
+            Ok(nodes) => self.resource_json = Self::pretty(&nodes),
+            Err(e) => self.set_error(format!("discover_nodes failed: {e:?}")),
+        }
+    }
+
+    fn list_discovered_nodes(&mut self) {
+        self.clear_error();
+        let services = self.services.clone();
+        let nodes = self.runtime.block_on(async move { services.resource_manager.list_discovered_nodes().await });
+        self.resource_json = Self::pretty(&nodes);
+    }
+
+    fn set_remote_access(&mut self) {
+        self.clear_error();
+        let allow = self.allow_remote_access;
+        let services = self.services.clone();
+        self.runtime.block_on(async move {
+            services.resource_manager.set_remote_access(allow).await;
+        });
+        self.resource_json = format!("remote_access={allow}\n\n{}", self.resource_json);
+    }
+
+    fn get_remote_access_status(&mut self) {
+        self.clear_error();
+        let services = self.services.clone();
+        let allow = self.runtime.block_on(async move { services.resource_manager.get_remote_access_status().await });
+        self.allow_remote_access = allow;
+        self.resource_json = format!("remote_access={allow}\n\n{}", self.resource_json);
+    }
+
+    fn create_swarm_group(&mut self) {
+        self.clear_error();
+        let name = self.group_name.clone();
+        let max_members = self.group_max_members;
+        let services = self.services.clone();
+        let res = self.runtime.block_on(async move {
+            services.resource_manager.create_swarm_group(name, max_members).await
+        });
+        match res {
+            Ok(id) => {
+                self.group_id = id.clone();
+                self.resource_json = format!("created group: {id}\n\n{}", self.resource_json);
+            }
+            Err(e) => self.set_error(format!("create_swarm_group failed: {e:?}")),
+        }
+    }
+
+    fn join_swarm_group(&mut self) {
+        self.clear_error();
+        let group_id = self.group_id.clone();
+        let services = self.services.clone();
+        let res = self.runtime.block_on(async move { services.resource_manager.join_swarm_group(group_id).await });
+        if let Err(e) = res {
+            self.set_error(format!("join_swarm_group failed: {e:?}"));
+        }
+    }
+
+    fn leave_swarm_group(&mut self) {
+        self.clear_error();
+        let group_id = self.group_id.clone();
+        let services = self.services.clone();
+        let res = self.runtime.block_on(async move { services.resource_manager.leave_swarm_group(group_id).await });
+        if let Err(e) = res {
+            self.set_error(format!("leave_swarm_group failed: {e:?}"));
+        }
+    }
+
+    fn list_swarm_groups(&mut self) {
+        self.clear_error();
+        let services = self.services.clone();
+        let groups = self.runtime.block_on(async move { services.resource_manager.list_swarm_groups().await });
+        self.resource_json = Self::pretty(&groups);
+    }
+
+    fn get_group_members(&mut self) {
+        self.clear_error();
+        let group_id = self.group_id.clone();
+        let services = self.services.clone();
+        let res = self.runtime.block_on(async move { services.resource_manager.get_group_members(group_id).await });
+        match res {
+            Ok(members) => self.resource_json = Self::pretty(&members),
+            Err(e) => self.set_error(format!("get_group_members failed: {e:?}")),
+        }
+    }
+
+    fn set_balancing_strategy(&mut self) {
+        self.clear_error();
+        let strategy = self.balancing_strategy.clone();
+        let services = self.services.clone();
+        self.runtime.block_on(async move {
+            services.resource_manager.set_balancing_strategy(strategy).await;
+        });
+    }
+
+    fn get_balancing_strategy(&mut self) {
+        self.clear_error();
+        let services = self.services.clone();
+        let s = self.runtime.block_on(async move { services.resource_manager.get_balancing_strategy().await });
+        self.balancing_strategy = s;
+        self.resource_json = format!("balancing={:?}\n\n{}", self.balancing_strategy, self.resource_json);
+    }
+
+    fn create_resource_pool(&mut self) {
+        self.clear_error();
+        let name = self.pool_name.clone();
+        let node_ids: Vec<String> = self
+            .pool_node_ids_csv
+            .split(',')
+            .map(|s| s.trim())
+            .filter(|s| !s.is_empty())
+            .map(|s| s.to_string())
+            .collect();
+        let services = self.services.clone();
+        let res = self.runtime.block_on(async move {
+            services.resource_manager.create_resource_pool(name, node_ids).await
+        });
+        match res {
+            Ok(id) => self.resource_json = format!("created pool: {id}\n\n{}", self.resource_json),
+            Err(e) => self.set_error(format!("create_resource_pool failed: {e:?}")),
+        }
+    }
+
+    fn list_resource_pools(&mut self) {
+        self.clear_error();
+        let services = self.services.clone();
+        let pools = self.runtime.block_on(async move { services.resource_manager.list_resource_pools().await });
+        self.resource_json = Self::pretty(&pools);
+    }
+
+    fn request_resources(&mut self) {
+        self.clear_error();
+
+        let cpu_cores = self.req_cpu_cores.trim().parse::<u32>().ok();
+        let memory_mb = self.req_memory_mb.trim().parse::<u64>().ok();
+        let gpu_memory_mb = self.req_gpu_memory_mb.trim().parse::<u64>().ok();
+        let preferred_models: Vec<String> = self
+            .req_preferred_models_csv
+            .split(',')
+            .map(|s| s.trim())
+            .filter(|s| !s.is_empty())
+            .map(|s| s.to_string())
+            .collect();
+
+        let requirements = vangriten_ai_swarm::shared::models::ResourceRequirements {
+            cpu_cores,
+            memory_mb,
+            gpu_required: self.req_gpu_required,
+            gpu_memory_mb,
+            preferred_models,
+        };
+
+        let task_type = self.req_task_type.clone();
+        let priority = self.req_priority.clone();
+        let services = self.services.clone();
+
+        let res = self.runtime.block_on(async move {
+            services
+                .resource_manager
+                .request_resources(requirements, task_type, priority)
+                .await
+        });
+
+        match res {
+            Ok(allocation) => {
+                self.allocation_id = allocation.allocation_id.clone();
+                self.resource_json = Self::pretty(&allocation);
+            }
+            Err(e) => self.set_error(format!("request_resources failed: {e:?}")),
+        }
+    }
+
+    fn release_allocation(&mut self) {
+        self.clear_error();
+        let allocation_id = self.allocation_id.clone();
+        let services = self.services.clone();
+        let res = self.runtime.block_on(async move {
+            services.resource_manager.release_allocation(allocation_id).await
+        });
+        if let Err(e) = res {
+            self.set_error(format!("release_allocation failed: {e:?}"));
+        }
+    }
+
+    fn perform_health_check(&mut self) {
+        self.clear_error();
+        let node_id = self.node_id.clone();
+        let services = self.services.clone();
+        let res = self.runtime.block_on(async move {
+            services.resource_manager.perform_health_check(node_id).await
+        });
+        match res {
+            Ok(hc) => self.resource_json = Self::pretty(&hc),
+            Err(e) => self.set_error(format!("health_check failed: {e:?}")),
+        }
+    }
 }
 
 #[cfg(feature = "native-gui")]
@@ -429,6 +748,185 @@ impl eframe::App for VgaGuiApp {
                     }
                     eframe::egui::ScrollArea::vertical().max_height(140.0).show(ui, |ui| {
                         ui.monospace(&self.peers_json);
+                    });
+                });
+
+                cols[0].add_space(8.0);
+
+                cols[0].group(|ui| {
+                    ui.heading(self.tr("API 提供商", "API Providers"));
+
+                    ui.horizontal(|ui| {
+                        ui.label(self.tr("筛选：", "Filter:"));
+                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::All, self.tr("全部", "All"));
+                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::China, self.tr("中国", "China"));
+                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::USA, self.tr("美国", "USA"));
+                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::Global, self.tr("全球", "Global"));
+
+                        if ui.button(self.tr("加载", "Load")).clicked() {
+                            self.load_providers();
+                        }
+                    });
+
+                    eframe::egui::ScrollArea::vertical().max_height(160.0).show(ui, |ui| {
+                        ui.monospace(&self.providers_json);
+                    });
+
+                    ui.separator();
+
+                    ui.horizontal(|ui| {
+                        ui.label(self.tr("Provider ID", "Provider ID"));
+                        ui.text_edit_singleline(&mut self.provider_id);
+                        if ui.button(self.tr("获取配置", "Get Config")).clicked() {
+                            self.get_provider_config();
+                        }
+                        if ui.button(self.tr("设为默认", "Set Default")).clicked() {
+                            self.set_default_provider();
+                        }
+                    });
+
+                    eframe::egui::ScrollArea::vertical().max_height(140.0).show(ui, |ui| {
+                        ui.monospace(&self.provider_config_json);
+                    });
+                });
+
+                cols[0].add_space(8.0);
+
+                cols[0].group(|ui| {
+                    ui.heading(self.tr("资源管理", "Resources"));
+
+                    ui.horizontal(|ui| {
+                        if ui.button(self.tr("发现节点", "Discover Nodes")).clicked() {
+                            self.discover_nodes();
+                        }
+                        if ui.button(self.tr("列出节点", "List Nodes")).clicked() {
+                            self.list_discovered_nodes();
+                        }
+                        if ui.button(self.tr("读取远程开关", "Get Remote Status")).clicked() {
+                            self.get_remote_access_status();
+                        }
+                        if ui.button(self.tr("应用远程开关", "Set Remote Status")).clicked() {
+                            self.set_remote_access();
+                        }
+                        ui.checkbox(&mut self.allow_remote_access, self.tr("允许远程", "Allow remote"));
+                    });
+
+                    ui.horizontal(|ui| {
+                        ui.label(self.tr("策略", "Strategy"));
+                        ui.selectable_value(
+                            &mut self.balancing_strategy,
+                            vangriten_ai_swarm::shared::models::BalancingStrategy::LeastLoaded,
+                            self.tr("最小负载", "LeastLoaded"),
+                        );
+                        ui.selectable_value(
+                            &mut self.balancing_strategy,
+                            vangriten_ai_swarm::shared::models::BalancingStrategy::RoundRobin,
+                            self.tr("轮询", "RoundRobin"),
+                        );
+                        ui.selectable_value(
+                            &mut self.balancing_strategy,
+                            vangriten_ai_swarm::shared::models::BalancingStrategy::Random,
+                            self.tr("随机", "Random"),
+                        );
+
+                        if ui.button(self.tr("设置", "Set")).clicked() {
+                            self.set_balancing_strategy();
+                        }
+                        if ui.button(self.tr("读取", "Get")).clicked() {
+                            self.get_balancing_strategy();
+                        }
+                    });
+
+                    ui.separator();
+
+                    ui.horizontal(|ui| {
+                        ui.label(self.tr("Group 名称", "Group name"));
+                        ui.text_edit_singleline(&mut self.group_name);
+                        ui.label(self.tr("最大成员", "Max"));
+                        ui.add(eframe::egui::DragValue::new(&mut self.group_max_members).clamp_range(1..=10_000));
+                        if ui.button(self.tr("创建组", "Create")).clicked() {
+                            self.create_swarm_group();
+                        }
+                    });
+
+                    ui.horizontal(|ui| {
+                        ui.label(self.tr("Group ID", "Group ID"));
+                        ui.text_edit_singleline(&mut self.group_id);
+                        if ui.button(self.tr("加入", "Join")).clicked() {
+                            self.join_swarm_group();
+                        }
+                        if ui.button(self.tr("离开", "Leave")).clicked() {
+                            self.leave_swarm_group();
+                        }
+                        if ui.button(self.tr("列出组", "List")).clicked() {
+                            self.list_swarm_groups();
+                        }
+                        if ui.button(self.tr("成员", "Members")).clicked() {
+                            self.get_group_members();
+                        }
+                    });
+
+                    ui.separator();
+
+                    ui.horizontal(|ui| {
+                        ui.label(self.tr("Pool 名称", "Pool name"));
+                        ui.text_edit_singleline(&mut self.pool_name);
+                        ui.label(self.tr("节点IDs (逗号)", "Node IDs (csv)"));
+                        ui.text_edit_singleline(&mut self.pool_node_ids_csv);
+                    });
+                    ui.horizontal(|ui| {
+                        if ui.button(self.tr("创建 Pool", "Create Pool")).clicked() {
+                            self.create_resource_pool();
+                        }
+                        if ui.button(self.tr("列出 Pools", "List Pools")).clicked() {
+                            self.list_resource_pools();
+                        }
+                    });
+
+                    ui.separator();
+
+                    ui.horizontal(|ui| {
+                        ui.label(self.tr("任务类型", "Task type"));
+                        ui.text_edit_singleline(&mut self.req_task_type);
+                        ui.label(self.tr("优先级", "Priority"));
+                        ui.selectable_value(&mut self.req_priority, vangriten_ai_swarm::shared::models::Priority::Low, self.tr("低", "Low"));
+                        ui.selectable_value(&mut self.req_priority, vangriten_ai_swarm::shared::models::Priority::Medium, self.tr("中", "Medium"));
+                        ui.selectable_value(&mut self.req_priority, vangriten_ai_swarm::shared::models::Priority::High, self.tr("高", "High"));
+                        ui.selectable_value(&mut self.req_priority, vangriten_ai_swarm::shared::models::Priority::Critical, self.tr("紧急", "Critical"));
+                    });
+                    ui.horizontal(|ui| {
+                        ui.label(self.tr("CPU cores", "CPU cores"));
+                        ui.text_edit_singleline(&mut self.req_cpu_cores);
+                        ui.label(self.tr("内存MB", "Memory MB"));
+                        ui.text_edit_singleline(&mut self.req_memory_mb);
+                        ui.checkbox(&mut self.req_gpu_required, self.tr("需要GPU", "GPU"));
+                        ui.label(self.tr("GPU MB", "GPU MB"));
+                        ui.text_edit_singleline(&mut self.req_gpu_memory_mb);
+                    });
+                    ui.horizontal(|ui| {
+                        ui.label(self.tr("偏好模型(csv)", "Models (csv)"));
+                        ui.text_edit_singleline(&mut self.req_preferred_models_csv);
+                        if ui.button(self.tr("申请资源", "Request")).clicked() {
+                            self.request_resources();
+                        }
+                    });
+                    ui.horizontal(|ui| {
+                        ui.label(self.tr("Allocation ID", "Allocation ID"));
+                        ui.text_edit_singleline(&mut self.allocation_id);
+                        if ui.button(self.tr("释放", "Release")).clicked() {
+                            self.release_allocation();
+                        }
+                    });
+                    ui.horizontal(|ui| {
+                        ui.label(self.tr("Node ID", "Node ID"));
+                        ui.text_edit_singleline(&mut self.node_id);
+                        if ui.button(self.tr("健康检查", "Health Check")).clicked() {
+                            self.perform_health_check();
+                        }
+                    });
+
+                    eframe::egui::ScrollArea::vertical().max_height(160.0).show(ui, |ui| {
+                        ui.monospace(&self.resource_json);
                     });
                 });
 

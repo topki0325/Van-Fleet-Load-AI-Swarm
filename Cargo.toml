@@ -82,6 +82,10 @@ native-gui = ["eframe"]
 name = "vga-gui"
 path = "src/bin/vga_gui.rs"
 
+[[bin]]
+name = "resource-manager"
+path = "src/bin/resource_manager.rs"
+
 [profile.release]
 opt-level = 3
 lto = true

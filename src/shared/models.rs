@@ -222,7 +222,7 @@ pub struct TaskSpec {
     pub context_range: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Priority {
     Low,
     Medium,
@@ -549,7 +549,7 @@ pub struct LoadBalancingStrategy {
     pub weights: HashMap<String, f64>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum BalancingStrategy {
     RoundRobin,
     LeastLoaded,
