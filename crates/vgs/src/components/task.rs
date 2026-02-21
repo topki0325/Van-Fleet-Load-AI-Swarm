@@ -5,7 +5,7 @@ use eframe::egui;
 pub struct TaskComponent;
 
 impl TaskComponent {
-    pub fn ui(&mut self, ui: &mut egui::Ui, app: &mut crate::VgaGuiApp) {
+    pub fn ui(&mut self, ui: &mut egui::Ui, app: &mut crate::app::VgaGuiApp) {
         ui.heading(app.tr("任务", "Task"));
         ui.separator();
 

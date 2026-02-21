@@ -11,6 +11,8 @@ autobins = false
 members = [
 	"crates/vas-core",
 	"crates/vgs",
+	"crates/vgs-discovery",
+	"crates/vas-ollama-share",
 ]
 
 [dependencies]

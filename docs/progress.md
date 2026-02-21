@@ -119,25 +119,21 @@
   - 并行编译界面
   - 编译结果展示
 
-### 9) 双语文档支持
+### 10) 代码重构与模块化（2026-02-21 完成）
 
-- ✅ 完整的英语文档
-  - 项目主文档（README-en.md）
-  - 文档索引（docs/README-en.md）
-  - 功能模块文档（4 个）
-- ✅ 文档命名规范
-  - 中文文档：无后缀（如 `ollama.md`）
-  - 英语文档：`-en.md` 后缀（如 `ollama-en.md`）
-- ✅ 文档内容对应
-  - 功能概述
-  - 安装指南
-  - 使用说明
-  - 代码示例
-  - API 参考
-  - 故障排除
-- ✅ 更新中文文档
-  - 添加英语文档链接
-  - 同步新功能内容
+- ✅ 大文件拆分完成
+  - `src/bin/vga_gui.rs`（934行）→ 拆分为4个模块：`app_types.rs`、`app.rs`、`app_actions.rs`、`app_ui.rs`
+  - `src/shared/models.rs`（619行）→ 拆分为4个子模块：`core.rs`、`vault.rs`、`network.rs`、`resource.rs`
+  - `src/frontend/mod.rs`（619行）→ 拆分为6个命令文件：`vault_commands.rs`、`project_commands.rs`、`task_commands.rs`、`resource_commands.rs`、`compiler_commands.rs`、`ollama_commands.rs`
+  - `src/backend/ollama_client.rs`（526行）→ 拆分为3个文件：`types.rs`、`client.rs`、`manager.rs`
+- ✅ 模块化改进
+  - 按领域驱动设计组织代码结构
+  - 提高代码可维护性和可读性
+  - 保持向后兼容性通过重新导出
+- ✅ 构建验证
+  - 所有活跃crate（vgs、vgs-discovery、vas-ollama-share）构建成功
+  - 无编译错误或警告
+  - 文件大小显著减少（最大文件从934行降至541行）
 
 ## 如何验证（建议顺序）
 
@@ -181,9 +177,7 @@
 
 本仓库按"排除 target/.git/dist/icons"扫描后，较大的文件主要集中在：
 
-- `src/bin/vga_gui.rs`（约 44KB / 1000+ 行）：建议继续按组件拆分（下一批优先：Providers 视图、API 管理弹窗、右侧 Info 面板）
-- `src/backend/resource_manager.rs`（约 23KB）：资源管理代理实现，包含节点发现、资源分配、负载均衡等功能
-- `src/backend/ollama_client.rs`（约 18KB）：Ollama 客户端实现，包含模型管理、聊天、生成等功能
+- `src/backend/resource_manager.rs`（约 23KB / 541行）：资源管理代理实现，包含节点发现、资源分配、负载均衡等功能
 - `src/backend/provider_config.rs`（约 13KB）：AI 提供商配置，包含多个提供商的配置管理
 - `src/backend/c_compiler.rs`（约 13KB）：C 编译器调度器，包含 GCC 发现和编译调度
 - `src/backend/api_manager.rs`（约 12KB）：API 密钥管理器，包含加密存储和密钥管理
@@ -191,9 +185,12 @@
 - `src/backend/network_discovery.rs`（约 10KB）：网络发现模块，包含 mDNS 和 UDP 发现
 - `rustup-init.exe`（约 10MB）：属于安装器二进制，通常不建议纳入源码仓库；如只是本地开发便利，建议移出仓库或加入忽略规则
 
+**更新说明（2026-02-21）**：已完成大文件拆分，原有的超大文件（vga_gui.rs、models.rs、frontend/mod.rs、ollama_client.rs）已按领域驱动设计拆分为多个小模块，显著提高了代码可维护性。
+
 ## 下一步（推荐）
 
 ### 短期目标
+- ✅ **已完成**：大文件拆分与模块化重构
 - 任务输出与日志：支持流式输出、失败原因与重试策略
 - 将 projects/leases 从内存存储升级为可持久化（本地文件/SQLite）
 - 完善 Ollama 集成：添加更多模型支持、流式响应、自定义参数

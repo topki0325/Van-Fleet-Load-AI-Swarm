@@ -6445,6 +6445,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "vas-ollama-share"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "vas-core",
+]
+
+[[package]]
 name = "vcpkg"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6481,6 +6492,20 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "uuid",
+ "vas-core",
+]
+
+[[package]]
+name = "vgs-discovery"
+version = "0.1.0"
+dependencies = [
+ "eframe",
+ "egui-chinese-font",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
  "vas-core",
 ]
 

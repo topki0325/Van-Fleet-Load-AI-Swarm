@@ -44,9 +44,9 @@ enum ProviderFilter {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ActiveView {
     Task,
-    ApiKeys,
+    Api,
     Network,
-    Providers,
+    Ollama,
     Resources,
 }
 
@@ -60,6 +60,7 @@ struct VgaGuiApp {
 
     task_view: crate::components::task::TaskComponent,
     network_view: crate::components::network::NetworkComponent,
+    ollama_view: crate::components::ollama::OllamaComponent,
     resources_view: crate::components::resources::ResourcesComponent,
 
     // Inputs
@@ -169,6 +170,7 @@ impl VgaGuiApp {
 
             task_view: crate::components::task::TaskComponent::default(),
             network_view: crate::components::network::NetworkComponent::default(),
+            ollama_view: crate::components::ollama::OllamaComponent::default(),
             resources_view: crate::components::resources::ResourcesComponent::default(),
 
             task_language: "rust".to_string(),
@@ -543,16 +545,6 @@ impl VgaGuiApp {
         self.refresh_all();
     }
 
-    fn discover_peers(&mut self) {
-        self.clear_error();
-        let services = self.services.clone();
-        let res = self.runtime.block_on(async move { services.network_discovery.discover_peers().await });
-        match res {
-            Ok(v) => self.peers_json = Self::pretty(&v),
-            Err(e) => self.set_error(format!("discover_peers failed: {e:?}")),
-        }
-    }
-
     fn load_providers(&mut self) {
         self.clear_error();
 
@@ -883,30 +875,25 @@ impl eframe::App for VgaGuiApp {
                 ui.separator();
 
                 let label_task = self.tr("任务", "Task");
-                let label_api_keys = self.tr("API密钥", "API Keys");
+                let label_api = self.tr("API", "API");
                 let label_network = self.tr("网络", "Network");
-                let label_providers = self.tr("API提供商", "Providers");
+                let label_ollama = self.tr("本地Ollama", "Ollama");
                 let label_resources = self.tr("资源管理", "Resources");
 
                 if ui.selectable_label(self.active_view == ActiveView::Task, label_task).clicked() {
                     self.active_view = ActiveView::Task;
                 }
-                if ui.selectable_label(self.active_view == ActiveView::ApiKeys, label_api_keys).clicked() {
-                    self.active_view = ActiveView::ApiKeys;
+                if ui.selectable_label(self.active_view == ActiveView::Api, label_api).clicked() {
+                    self.active_view = ActiveView::Api;
                 }
                 if ui.selectable_label(self.active_view == ActiveView::Network, label_network).clicked() {
                     self.active_view = ActiveView::Network;
                 }
-                if ui.selectable_label(self.active_view == ActiveView::Providers, label_providers).clicked() {
-                    self.active_view = ActiveView::Providers;
+                if ui.selectable_label(self.active_view == ActiveView::Ollama, label_ollama).clicked() {
+                    self.active_view = ActiveView::Ollama;
                 }
                 if ui.selectable_label(self.active_view == ActiveView::Resources, label_resources).clicked() {
                     self.active_view = ActiveView::Resources;
-                }
-
-                ui.separator();
-                if ui.button(self.tr("API管理(弹窗)", "API Manager (popup)")).clicked() {
-                    self.show_api_manager = true;
                 }
             });
 
@@ -959,82 +946,97 @@ impl eframe::App for VgaGuiApp {
                             task_view.ui(ui, self);
                             self.task_view = task_view;
                         }
-                        ActiveView::ApiKeys => {
-                            ui.heading(self.tr("API 密钥管理", "API Keys"));
+                        ActiveView::Api => {
+                            ui.heading(self.tr("API", "API"));
                             ui.separator();
-                            ui.label(self.tr(
-                                "金库(Vault)功能已合并到 API管理 弹窗中：查看/保存 APIKey 需要先输入密码解锁。",
-                                "Vault functions are consolidated into the API Manager popup. Unlock with a password to view/store API keys.",
-                            ));
-                            if ui.button(self.tr("打开 API管理 弹窗", "Open API Manager"))
-                                .clicked()
-                            {
-                                self.show_api_manager = true;
-                            }
+
+                            eframe::egui::CollapsingHeader::new(self.tr("API密钥管理", "API Keys"))
+                                .id_source("api_sub_keys")
+                                .default_open(true)
+                                .show(ui, |ui| {
+                                    ui.label(self.tr(
+                                        "APIKey 的查看/保存在 API管理 弹窗中完成：需要先输入密码解锁（本地加密存储）。",
+                                        "API keys are managed in the API Manager popup: unlock with a password first (encrypted at rest).",
+                                    ));
+                                    if ui
+                                        .button(self.tr("打开 API管理 弹窗", "Open API Manager"))
+                                        .clicked()
+                                    {
+                                        self.show_api_manager = true;
+                                    }
+                                });
+
+                            ui.separator();
+
+                            eframe::egui::CollapsingHeader::new(self.tr("API提供商", "Providers"))
+                                .id_source("api_sub_providers")
+                                .default_open(true)
+                                .show(ui, |ui| {
+                                    eframe::egui::CollapsingHeader::new(self.tr("列表", "List"))
+                                        .id_source("providers_sub_list")
+                                        .default_open(true)
+                                        .show(ui, |ui| {
+                                            ui.horizontal_wrapped(|ui| {
+                                                let label_filter = self.tr("筛选：", "Filter:");
+                                                let label_all = self.tr("全部", "All");
+                                                let label_china = self.tr("中国", "China");
+                                                let label_usa = self.tr("美国", "USA");
+                                                let label_global = self.tr("全球", "Global");
+
+                                                ui.label(label_filter);
+                                                ui.selectable_value(&mut self.provider_filter, ProviderFilter::All, label_all);
+                                                ui.selectable_value(&mut self.provider_filter, ProviderFilter::China, label_china);
+                                                ui.selectable_value(&mut self.provider_filter, ProviderFilter::USA, label_usa);
+                                                ui.selectable_value(&mut self.provider_filter, ProviderFilter::Global, label_global);
+
+                                                if ui.button(self.tr("加载", "Load")).clicked() {
+                                                    self.load_providers();
+                                                }
+                                            });
+
+                                            eframe::egui::ScrollArea::vertical()
+                                                .id_source("providers_json_scroll")
+                                                .max_height(220.0)
+                                                .show(ui, |ui| {
+                                                    ui.monospace(&self.providers_json);
+                                                });
+                                        });
+
+                                    ui.separator();
+
+                                    eframe::egui::CollapsingHeader::new(self.tr("配置", "Config"))
+                                        .id_source("providers_sub_config")
+                                        .default_open(false)
+                                        .show(ui, |ui| {
+                                            ui.horizontal_wrapped(|ui| {
+                                                ui.label(self.tr("Provider ID", "Provider ID"));
+                                                ui.text_edit_singleline(&mut self.provider_id);
+                                                if ui.button(self.tr("获取配置", "Get Config")).clicked() {
+                                                    self.get_provider_config();
+                                                }
+                                                if ui.button(self.tr("设为默认", "Set Default")).clicked() {
+                                                    self.set_default_provider();
+                                                }
+                                            });
+
+                                            eframe::egui::ScrollArea::vertical()
+                                                .id_source("provider_config_json_scroll")
+                                                .max_height(200.0)
+                                                .show(ui, |ui| {
+                                                    ui.monospace(&self.provider_config_json);
+                                                });
+                                        });
+                                });
                         }
                         ActiveView::Network => {
                             let mut network_view = std::mem::take(&mut self.network_view);
                             network_view.ui(ui, self);
                             self.network_view = network_view;
                         }
-                        ActiveView::Providers => {
-                            ui.heading(self.tr("API 提供商", "API Providers"));
-                            ui.separator();
-
-                            eframe::egui::CollapsingHeader::new(self.tr("列表", "List"))
-                                .id_source("providers_sub_list")
-                                .default_open(true)
-                                .show(ui, |ui| {
-                                    ui.horizontal_wrapped(|ui| {
-                                        let label_filter = self.tr("筛选：", "Filter:");
-                                        let label_all = self.tr("全部", "All");
-                                        let label_china = self.tr("中国", "China");
-                                        let label_usa = self.tr("美国", "USA");
-                                        let label_global = self.tr("全球", "Global");
-
-                                        ui.label(label_filter);
-                                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::All, label_all);
-                                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::China, label_china);
-                                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::USA, label_usa);
-                                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::Global, label_global);
-
-                                        if ui.button(self.tr("加载", "Load")).clicked() {
-                                            self.load_providers();
-                                        }
-                                    });
-
-                                    eframe::egui::ScrollArea::vertical()
-                                        .id_source("providers_json_scroll")
-                                        .max_height(220.0)
-                                        .show(ui, |ui| {
-                                            ui.monospace(&self.providers_json);
-                                        });
-                                });
-
-                            ui.separator();
-
-                            eframe::egui::CollapsingHeader::new(self.tr("配置", "Config"))
-                                .id_source("providers_sub_config")
-                                .default_open(false)
-                                .show(ui, |ui| {
-                                    ui.horizontal_wrapped(|ui| {
-                                        ui.label(self.tr("Provider ID", "Provider ID"));
-                                        ui.text_edit_singleline(&mut self.provider_id);
-                                        if ui.button(self.tr("获取配置", "Get Config")).clicked() {
-                                            self.get_provider_config();
-                                        }
-                                        if ui.button(self.tr("设为默认", "Set Default")).clicked() {
-                                            self.set_default_provider();
-                                        }
-                                    });
-
-                                    eframe::egui::ScrollArea::vertical()
-                                        .id_source("provider_config_json_scroll")
-                                        .max_height(200.0)
-                                        .show(ui, |ui| {
-                                            ui.monospace(&self.provider_config_json);
-                                        });
-                                });
+                        ActiveView::Ollama => {
+                            let mut ollama_view = std::mem::take(&mut self.ollama_view);
+                            ollama_view.ui(ui, self);
+                            self.ollama_view = ollama_view;
                         }
                         ActiveView::Resources => {
                             let mut resources_view = std::mem::take(&mut self.resources_view);

@@ -4,7 +4,7 @@ use eframe::egui;
 pub struct ResourcesComponent;
 
 impl ResourcesComponent {
-    pub fn ui(&mut self, ui: &mut egui::Ui, app: &mut crate::VgaGuiApp) {
+    pub fn ui(&mut self, ui: &mut egui::Ui, app: &mut crate::app::VgaGuiApp) {
         ui.heading(app.tr("资源管理", "Resources"));
         ui.separator();
 

@@ -67,6 +67,14 @@ impl ResourceManager {
         })
     }
 
+    pub async fn local_node_id(&self) -> String {
+        self.node_info.read().await.id.clone()
+    }
+
+    pub async fn local_node_info(&self) -> NodeInfo {
+        self.node_info.read().await.clone()
+    }
+
     async fn get_local_ip() -> Result<String, VgaError> {
         let socket = UdpSocket::bind("0.0.0.0:0")
             .await
