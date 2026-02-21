@@ -155,14 +155,14 @@ pub struct VersionResponse {
     pub version: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OllamaConnectionStatus {
     pub is_connected: bool,
     pub version: Option<String>,
     pub error: Option<String>,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct OllamaUsageStats {
     pub total_requests: u64,
     pub total_tokens: u64,
@@ -170,7 +170,7 @@ pub struct OllamaUsageStats {
     pub model_stats: HashMap<String, ModelUsageStats>,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct ModelUsageStats {
     pub requests: u64,
     pub tokens: u64,

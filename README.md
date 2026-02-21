@@ -3,9 +3,104 @@
 [![CI](https://github.com/topki0325/Vangriten-AI-swarm/workflows/CI/badge.svg)](https://github.com/topki0325/Vangriten-AI-swarm/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+[English](#english) | [中文](#中文)
+
+---
+
+## English
+
+Vangriten AI Swarm is a high-concurrency AI swarm framework built with Rust, designed to coordinate multiple AI agents for collaborative development.
+
+### ✨ Features
+
+- 🚀 **High-Concurrency Execution**: Gatling-style scheduling system supporting thousands of AI agents working simultaneously
+- 🔒 **Enterprise-Grade Security**: AES-256 encrypted API keys with complete resource consumption statistics
+- 🌐 **Distributed Architecture**: LAN auto-discovery, supporting remote AI and GPU resource calls
+- 🛠️ **Multi-Language Support**: Complete compilation environment management for GCC, Conda, Rust, etc.
+- 🤖 **Local AI Models**: Fully integrated Ollama, supporting running various open-source AI models locally
+- 📊 **Real-time Monitoring**: Visual interface displaying swarm activity and agent status
+- 🔧 **Modular Design**: Extensible agent system supporting custom roles
+
+### 🏗️ Architecture
+
+```
+VGA = Vangriten Gatling AI
+├── V = Vangriten (Autonomous AI Orchestration)
+├── G = Gatling (High-Concurrency Rotary Scheduling)
+└── A = Architecture / AI / Autonomous (Three-Layer Architecture)
+```
+
+### 🚀 Quick Start
+
+#### System Requirements
+
+- Rust 1.70+
+- Node.js 18+
+- Supported OS: Windows, macOS, Linux
+
+#### Installation
+
+```bash
+git clone https://github.com/topki0325/vga-swarm.git
+cd vga-swarm
+cargo build --release
+```
+
+#### Running
+
+```bash
+cargo run
+```
+
+For **Rust Native GUI (No WebView)** (Recommended):
+
+```bash
+cargo run -p vgs
+```
+
+Windows executables:
+- `target/debug/vgs.exe` (dev build)
+- `target/release/vgs.exe` (release build)
+
+GUI window title: `vas`
+
+If you prefer Tauri CLI (Optional):
+
+```bash
+cargo install tauri-cli
+cargo tauri dev
+```
+
+### 📖 Documentation
+
+Detailed documentation: [docs/README-en.md](./docs/README-en.md) (English) or [docs/README.md](./docs/README.md) (Chinese).
+
+### 🤝 Contributing
+
+We welcome contributions of all kinds! See [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
+
+### 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+
+### 🙏 Acknowledgments
+
+- [Tauri](https://tauri.app/) - Desktop application framework
+- [Rust](https://www.rust-lang.org/) - Systems programming language
+- All contributors
+
+### 📞 Contact
+
+- Project Home: [https://github.com/topki0325/Vangriten-AI-swarm](https://github.com/topki0325/Vangriten-AI-swarm)
+- Issues: [https://github.com/topki0325/Vangriten-AI-swarm/issues](https://github.com/topki0325/Vangriten-AI-swarm/issues)
+
+---
+
+## 中文
+
 Vangriten AI Swarm 是一个高并发 AI 蜂群框架，基于 Rust 构建，旨在协调多个 AI 代理进行协作开发。
 
-## ✨ 特性
+### ✨ 特性
 
 - 🚀 **高并发执行**：加特林式调度系统，支持数千个 AI 代理同时工作
 - 🔒 **企业级安全**：AES-256 加密 API 密钥，完整的资源消耗统计
@@ -15,24 +110,24 @@ Vangriten AI Swarm 是一个高并发 AI 蜂群框架，基于 Rust 构建，旨
 - 📊 **实时监控**：可视化界面展示蜂群活动和代理状态
 - 🔧 **模块化设计**：可扩展的代理系统，支持自定义角色
 
-## 🏗️ 架构
+### 🏗️ 架构
 
-```text
+```
 VGA = Vangriten Gatling AI
 ├── V = Vangriten (自主 AI 编排)
 ├── G = Gatling (高并发旋转调度)
 └── A = Architecture / AI / Autonomous (三层架构)
 ```
 
-## 🚀 快速开始
+### 🚀 快速开始
 
-### 系统要求
+#### 系统要求
 
 - Rust 1.70+
 - Node.js 18+
 - 支持的操作系统：Windows, macOS, Linux
 
-### 安装
+#### 安装
 
 ```bash
 git clone https://github.com/topki0325/vga-swarm.git
@@ -40,7 +135,7 @@ cd vga-swarm
 cargo build --release
 ```
 
-### 运行
+#### 运行
 
 ```bash
 cargo run
@@ -66,25 +161,25 @@ cargo install tauri-cli
 cargo tauri dev
 ```
 
-## 📖 文档
+### 📖 文档
 
 详细文档请查看 [docs/README.md](./docs/README.md)（中文）或 [docs/README-en.md](./docs/README-en.md)（英文）。
 
-## 🤝 贡献
+### 🤝 贡献
 
 我们欢迎各种形式的贡献！请查看 [CONTRIBUTING.md](./CONTRIBUTING.md) 了解详情。
 
-## 📄 许可证
+### 📄 许可证
 
 本项目采用 MIT 许可证 - 查看 [LICENSE](./LICENSE) 文件了解详情。
 
-## 🙏 致谢
+### 🙏 致谢
 
 - [Tauri](https://tauri.app/) - 桌面应用框架
 - [Rust](https://www.rust-lang.org/) - 系统编程语言
 - 所有贡献者
 
-## 📞 联系
+### 📞 联系
 
 - 项目主页: [https://github.com/topki0325/Vangriten-AI-swarm](https://github.com/topki0325/Vangriten-AI-swarm)
 - Issues: [https://github.com/topki0325/Vangriten-AI-swarm/issues](https://github.com/topki0325/Vangriten-AI-swarm/issues)
