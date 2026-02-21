@@ -1,4 +1,4 @@
-# Vangriten AI Swarm
+# Van Fleet Load AI Swarm
 
 [![CI](https://github.com/topki0325/Vangriten-AI-swarm/workflows/CI/badge.svg)](https://github.com/topki0325/Vangriten-AI-swarm/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -9,7 +9,7 @@
 
 ## English
 
-Vangriten AI Swarm is a high-concurrency AI swarm framework built with Rust, designed to coordinate multiple AI agents for collaborative development.
+Van Fleet Load AI Swarm is a high-concurrency AI swarm framework built with Rust, designed to coordinate multiple AI agents for collaborative development.
 
 ### ✨ Features
 
@@ -23,11 +23,11 @@ Vangriten AI Swarm is a high-concurrency AI swarm framework built with Rust, des
 
 ### 🏗️ Architecture
 
-Vangriten-AI-Swarm draws inspiration from the "Van Fleet load" - the legendary artillery barrage tactic from the Korean War, reimagined as a coordinated AI agent framework:
+Van Fleet Load AI Swarm draws inspiration from the "Van Fleet load" - the legendary artillery barrage tactic from the Korean War, reimagined as a coordinated AI agent framework:
 
 ```
-VAS = Vangriten AI Swarm
-├── V = Van Fleet (Van Fleet Load)
+VFLAS = Van Fleet Load AI Swarm
+├── VFL = Van Fleet Load (Van Fleet Load)
 │   └── Inspired by the overwhelming artillery barrage tactic
 │       that consumed massive ammunition in the Korean War
 ├── A = AI (Artificial Intelligence Agents)
@@ -108,7 +108,7 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 
 ## 中文
 
-Vangriten AI Swarm 是一个高并发 AI 蜂群框架，基于 Rust 构建，旨在协调多个 AI 代理进行协作开发。
+Van Fleet Load AI Swarm 是一个高并发 AI 蜂群框架，基于 Rust 构建，旨在协调多个 AI 代理进行协作开发。
 
 ### ✨ 特性
 
@@ -122,11 +122,11 @@ Vangriten AI Swarm 是一个高并发 AI 蜂群框架，基于 Rust 构建，旨
 
 ### 🏗️ 架构
 
-Vangriten-AI-Swarm 的灵感来源于朝鲜战争中的"Van Fleet load" - 传奇的火力压制战术，将其重新想象为协调的 AI 代理框架：
+Van Fleet Load AI Swarm 的灵感来源于朝鲜战争中的"Van Fleet load" - 传奇的火力压制战术，将其重新想象为协调的 AI 代理框架：
 
 ```
-VAS = Vangriten AI Swarm
-├── V = Van Fleet (Van Fleet Load)
+VFLAS = Van Fleet Load AI Swarm
+├── VFL = Van Fleet Load (Van Fleet Load)
 │   └── 灵感来源于朝鲜战争中的压倒性火炮轰击战术
 │       9天内消耗3.6万发炮弹夺取一座小山的传奇战例
 ├── A = AI (人工智能代理)
