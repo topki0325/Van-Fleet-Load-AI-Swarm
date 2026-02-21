@@ -293,3 +293,38 @@ pub async fn cmd_cancel_task(
         .map(|_| true)
         .map_err(|e| format!("Task cancellation failed: {:?}", e))
 }
+
+#[tauri::command]
+pub async fn cmd_get_providers(
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<Vec<ProviderConfig>, String> {
+    match state.api_manager.vault_operation(VaultOp::GetProviders) {
+        Ok(VaultResult::ProviderConfigs(providers)) => Ok(providers),
+        Ok(other) => Err(format!("Unexpected vault result: {:?}", other)),
+        Err(e) => Err(format!("Failed to get providers: {:?}", e)),
+    }
+}
+
+#[tauri::command]
+pub async fn cmd_get_provider_config(
+    provider: String,
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<ProviderConfig, String> {
+    match state.api_manager.vault_operation(VaultOp::GetProviderConfig { provider }) {
+        Ok(VaultResult::ProviderConfig(config)) => Ok(config),
+        Ok(other) => Err(format!("Unexpected vault result: {:?}", other)),
+        Err(e) => Err(format!("Failed to get provider config: {:?}", e)),
+    }
+}
+
+#[tauri::command]
+pub async fn cmd_set_default_provider(
+    provider: String,
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<String, String> {
+    match state.api_manager.vault_operation(VaultOp::SetDefaultProvider { provider }) {
+        Ok(VaultResult::DefaultProvider(provider)) => Ok(provider),
+        Ok(other) => Err(format!("Unexpected vault result: {:?}", other)),
+        Err(e) => Err(format!("Failed to set default provider: {:?}", e)),
+    }
+}

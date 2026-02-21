@@ -19,6 +19,26 @@
       <h2>Swarm</h2>
       <pre id="swarm">(not loaded)</pre>
 
+      <h2>API Providers</h2>
+      <div>
+        <button id="get-providers">Load Providers</button>
+        <button id="filter-china">China Only</button>
+        <button id="filter-usa">USA Only</button>
+        <button id="filter-all">All Providers</button>
+      </div>
+      <pre id="providers-output">(not loaded)</pre>
+
+      <h2>Provider Config</h2>
+      <div>
+        <label>
+          Provider ID:
+          <input id="provider-id" value="openai" />
+        </label>
+        <button id="get-provider-config">Get Config</button>
+        <button id="set-default-provider">Set Default</button>
+      </div>
+      <pre id="provider-config-output">(not loaded)</pre>
+
       <h2>Vault</h2>
       <div>
         <label>
@@ -317,6 +337,44 @@
         setText('vault-output', pretty({ usage }));
       }
 
+      async function loadProviders() {
+        const invoke = await getInvoke();
+        const providers = await invoke('cmd_get_providers');
+        setText('providers-output', pretty(providers));
+      }
+
+      async function filterChina() {
+        const invoke = await getInvoke();
+        const providers = await invoke('cmd_get_providers');
+        const chinaProviders = providers.filter(p => p.region === 'China');
+        setText('providers-output', pretty(chinaProviders));
+      }
+
+      async function filterUSA() {
+        const invoke = await getInvoke();
+        const providers = await invoke('cmd_get_providers');
+        const usaProviders = providers.filter(p => p.region === 'USA');
+        setText('providers-output', pretty(usaProviders));
+      }
+
+      async function filterAll() {
+        await loadProviders();
+      }
+
+      async function getProviderConfig() {
+        const invoke = await getInvoke();
+        const provider = document.getElementById('provider-id')?.value || '';
+        const config = await invoke('cmd_get_provider_config', { provider });
+        setText('provider-config-output', pretty(config));
+      }
+
+      async function setDefaultProvider() {
+        const invoke = await getInvoke();
+        const provider = document.getElementById('provider-id')?.value || '';
+        const result = await invoke('cmd_set_default_provider', { provider });
+        setText('provider-config-output', pretty({ default_provider: result }));
+      }
+
       document.getElementById('vault-store')?.addEventListener('click', () => {
         vaultStore().catch((e) => setText('vault-output', String(e)));
       });
@@ -331,6 +389,25 @@
       });
       document.getElementById('vault-usage')?.addEventListener('click', () => {
         vaultUsage().catch((e) => setText('vault-output', String(e)));
+      });
+
+      document.getElementById('get-providers')?.addEventListener('click', () => {
+        loadProviders().catch((e) => setText('providers-output', String(e)));
+      });
+      document.getElementById('filter-china')?.addEventListener('click', () => {
+        filterChina().catch((e) => setText('providers-output', String(e)));
+      });
+      document.getElementById('filter-usa')?.addEventListener('click', () => {
+        filterUSA().catch((e) => setText('providers-output', String(e)));
+      });
+      document.getElementById('filter-all')?.addEventListener('click', () => {
+        filterAll().catch((e) => setText('providers-output', String(e)));
+      });
+      document.getElementById('get-provider-config')?.addEventListener('click', () => {
+        getProviderConfig().catch((e) => setText('provider-config-output', String(e)));
+      });
+      document.getElementById('set-default-provider')?.addEventListener('click', () => {
+        setDefaultProvider().catch((e) => setText('provider-config-output', String(e)));
       });
 
       // Auto refresh once on load.

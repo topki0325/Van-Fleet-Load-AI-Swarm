@@ -3,6 +3,7 @@ pub mod agent_scheduler;
 pub mod compilation_scheduler;
 pub mod network_discovery;
 pub mod resource_manager;
+pub mod provider_config;
 pub mod agents;
 
 use std::sync::Arc;

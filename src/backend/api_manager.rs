@@ -7,6 +7,7 @@ use std::path::PathBuf;
 use tokio::sync::RwLock;
 use std::sync::Arc;
 use crate::shared::models::VaultUsageEntry;
+use crate::backend::provider_config::{get_predefined_providers, get_provider_by_id};
 
 #[derive(Clone)]
 pub struct ApiKeyManager {
@@ -57,7 +58,29 @@ impl ApiKeyManager {
                 let keys = self.list_providers()?;
                 Ok(VaultResult::Providers(keys))
             }
+            VaultOp::GetProviders => {
+                let providers = get_predefined_providers();
+                Ok(VaultResult::ProviderConfigs(providers))
+            }
+            VaultOp::GetProviderConfig { provider } => {
+                if let Some(config) = get_provider_by_id(&provider) {
+                    Ok(VaultResult::ProviderConfig(config))
+                } else {
+                    Err(VgaError::AuthVaultError(format!("Provider not found: {}", provider)))
+                }
+            }
+            VaultOp::SetDefaultProvider { provider } => {
+                self.set_default_provider(&provider)?;
+                Ok(VaultResult::DefaultProvider(provider))
+            }
         }
+    }
+
+    fn set_default_provider(&self, provider: &str) -> Result<(), VgaError> {
+        let dir = self.vault_path.parent().unwrap();
+        let file_path = dir.join("default_provider.txt");
+        fs::write(&file_path, provider.as_bytes())
+            .map_err(|e| VgaError::AuthVaultError(format!("Failed to write default provider: {e}")))
     }
 
     pub fn get_decrypted_key(&self, provider: &str) -> Result<String, VgaError> {

@@ -68,11 +68,19 @@ rand = "0.8"
 sys-info = "0.9"
 num_cpus = "1.16"
 
+# Optional native Rust GUI (no webview)
+eframe = { version = "0.27", optional = true }
+
 [build-dependencies]
 tauri-build = { version = "1.5", features = [] }
 
 [features]
 # see more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+native-gui = ["eframe"]
+
+[[bin]]
+name = "vga-gui"
+path = "src/bin/vga_gui.rs"
 
 [profile.release]
 opt-level = 3

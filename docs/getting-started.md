@@ -42,6 +42,12 @@
 cargo tauri dev
 ```
 
+运行 Rust 原生 GUI（无 WebView，可选）：
+
+```bash
+cargo run --features native-gui --bin vga-gui
+```
+
 运行已编译的二进制文件：
 
 ```bash

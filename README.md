@@ -45,6 +45,12 @@ cargo build --release
 cargo run
 ```
 
+如果你想使用 **Rust 原生 GUI（无 WebView）**：
+
+```bash
+cargo run --features native-gui --bin vga-gui
+```
+
 如果你偏好使用 Tauri CLI（可选）：
 
 ```bash

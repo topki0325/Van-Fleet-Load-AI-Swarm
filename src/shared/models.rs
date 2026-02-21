@@ -271,6 +271,9 @@ pub enum VaultOp {
     Retrieve { provider: String },
     Delete { provider: String },
     List,
+    GetProviders,
+    GetProviderConfig { provider: String },
+    SetDefaultProvider { provider: String },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -278,6 +281,36 @@ pub enum VaultResult {
     Success,
     Key(String),
     Providers(Vec<String>),
+    ProviderConfigs(Vec<ProviderConfig>),
+    ProviderConfig(ProviderConfig),
+    DefaultProvider(String),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProviderConfig {
+    pub id: String,
+    pub name: String,
+    pub region: ProviderRegion,
+    pub api_endpoint: String,
+    pub models: Vec<String>,
+    pub pricing: PricingInfo,
+    pub requires_api_key: bool,
+    pub description: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum ProviderRegion {
+    China,
+    USA,
+    Global,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PricingInfo {
+    pub currency: String,
+    pub input_price_per_1k: f64,
+    pub output_price_per_1k: f64,
+    pub free_tier_limit: Option<u64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
