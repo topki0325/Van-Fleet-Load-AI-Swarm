@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use crate::app_types::{UiLang, ProviderFilter, ActiveView};
+use crate::app_types::{UiLang, ProviderFilter, ActiveView, AiEntity};
 use vangriten_ai_swarm::shared::models::{Priority, BalancingStrategy};
 
 /// Root application state for the `vgs` GUI.
@@ -20,6 +20,20 @@ pub struct VgaGuiApp {
     pub task_target: String,
     pub task_context: String,
 
+    // New Project wizard (default open on launch)
+    pub show_new_project_wizard: bool,
+    pub new_project_kind: String,
+    pub new_project_root_dir: String,
+    pub new_project_name: String,
+
+    // Article quick-write inputs
+    pub article_topic: String,
+    pub article_groups_count: u8,
+    pub article_selected_entities: Vec<String>,
+    pub article_outline_entity: String,
+    pub article_master_entity: String,
+    pub article_group_assignments: Vec<String>,
+
     // API Manager popup state
     pub show_api_manager: bool,
     pub api_password: String,
@@ -30,6 +44,32 @@ pub struct VgaGuiApp {
     pub api_show_plaintext: bool,
     pub api_status: String,
     pub api_list_json: String,
+    pub api_stored_providers: Vec<String>,
+    pub api_usage_json: String,
+    pub api_quick_status: String,
+
+    // Named AI entities
+    pub ai_entities: Vec<AiEntity>,
+    pub entity_name_input: String,
+    pub entity_model_input: String,
+    pub entity_note_input: String,
+    pub entity_custom_url_input: String,
+    pub entity_key_header_input: String,
+    pub entity_key_prefix_input: String,
+    pub entity_selected: Option<usize>,
+    /// How many clones to create in burst mode (1–10)
+    pub entity_burst_count: u8,
+
+    // Custom / relay provider management
+    pub custom_providers: Vec<crate::app_types::CustomProvider>,
+    pub show_provider_picker: bool,
+    pub cp_id_input: String,
+    pub cp_name_input: String,
+    pub cp_url_input: String,
+    pub cp_key_header_input: String,
+    pub cp_key_prefix_input: String,
+    pub cp_models_input: String,
+    pub cp_description_input: String,
 
     pub provider_filter: ProviderFilter,
     pub provider_id: String,
@@ -128,6 +168,18 @@ impl VgaGuiApp {
             task_target: "code".to_string(),
             task_context: "Generate a simple function".to_string(),
 
+            show_new_project_wizard: true,
+            new_project_kind: "文章快速写".to_string(),
+            new_project_root_dir: "projects".to_string(),
+            new_project_name: "article-quick".to_string(),
+
+            article_topic: String::new(),
+            article_groups_count: 3,
+            article_selected_entities: Vec::new(),
+            article_outline_entity: String::new(),
+            article_master_entity: String::new(),
+            article_group_assignments: Vec::new(),
+
             show_api_manager: false,
             api_password: String::new(),
             api_password_confirm: String::new(),
@@ -137,6 +189,29 @@ impl VgaGuiApp {
             api_show_plaintext: false,
             api_status: String::new(),
             api_list_json: "(not loaded)".to_string(),
+            api_stored_providers: Vec::new(),
+            api_usage_json: "(not loaded)".to_string(),
+            api_quick_status: String::new(),
+
+            ai_entities: Vec::new(),
+            entity_name_input: String::new(),
+            entity_model_input: String::new(),
+            entity_note_input: String::new(),
+            entity_custom_url_input: String::new(),
+            entity_key_header_input: String::new(),
+            entity_key_prefix_input: String::new(),
+            entity_selected: None,
+            entity_burst_count: 3,
+
+            custom_providers: Vec::new(),
+            show_provider_picker: false,
+            cp_id_input: String::new(),
+            cp_name_input: String::new(),
+            cp_url_input: String::new(),
+            cp_key_header_input: String::new(),
+            cp_key_prefix_input: String::new(),
+            cp_models_input: String::new(),
+            cp_description_input: String::new(),
 
             provider_filter: ProviderFilter::All,
             provider_id: "openai".to_string(),
@@ -176,6 +251,7 @@ impl VgaGuiApp {
         };
 
         app.refresh_all();
+        app.load_entities();
         app
     }
 

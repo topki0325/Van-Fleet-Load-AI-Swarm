@@ -19,12 +19,22 @@ This file records the "completed/verifiable/pending" items for the current devel
 - ✅ Complete Ollama integration (local AI model support)
 - ✅ C compiler environment management (GCC instance discovery and scheduling)
 - ✅ Bilingual documentation support (Chinese + English)
+- ✅ **Custom Relay Provider Support**: Manual addition of API URLs, custom Key Headers/Prefixes
+- ✅ **AI Entity "Burst Mode"**: One-click cloning of 1-10 entities for high-concurrency API saturation
+- ✅ **Smart Project Wizard (Multi-mode Support)**:
+  - Integrated Windows folder picker (`rfd`), automated project directory/file creation
+  - **Article Quick-Write**: Three-stage automated workflow (Outline -> Parallel Writing -> Final Merge)
+  - **Website Prototype Quick-Build**: HTML5/Tailwind/JS stack for responsive UI prototypes
+  - **Software Prototype Quick-Build**: Rust/Python support, automated architecture and integration
+  - **Game Prototype Quick-Build**: Phaser.js based, building game loops and interaction scripts
+  - Automated local file structure (spec/src/index.html) and asynchronous task submission
 
 ## Completed (Key Milestones)
 
 ### 1) Project Compilable and Runnable
 
 - Added Tauri required build script build.rs (`tauri-build`)
+- Introduced `rfd` dependency for native directory selection dialogs
 - Fixed multiple Rust compilation errors (model types, imports, trait signatures, Tauri macro configs, etc.)
 - Added minimal frontend resources `dist/index.html` to let app run and display data
 

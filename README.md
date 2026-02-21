@@ -19,6 +19,9 @@ Van Fleet Load AI Swarm is a high-concurrency AI swarm framework built with Rust
 - 🛠️ **Multi-Language Support**: Complete compilation environment management for GCC, Conda, Rust, etc.
 - 🤖 **Local AI Models**: Fully integrated Ollama, supporting running various open-source AI models locally
 - 📊 **Real-time Monitoring**: Visual interface displaying swarm activity and agent status
+- 🌟 **Project Wizard**: Automatic workflow for "Article Quick-Write" with directory picker and task orchestration
+- 💥 **Burst Mode**: One-click creation of 1-10 AI entity clones for maximum API concurrency
+- 🔗 **Custom Relay Support**: Support for custom API providers with flexible URL and header settings
 - 🔧 **Modular Design**: Extensible agent system supporting custom roles
 
 ### 🏗️ Architecture
@@ -118,6 +121,9 @@ Van Fleet Load AI Swarm 是一个高并发 AI 蜂群框架，基于 Rust 构建�
 - 🛠️ **多语言支持**：GCC、Conda、Rust 等完整编译环境管理
 - 🤖 **本地 AI 模型**：完整集成 Ollama，支持在本地运行多种开源 AI 模型
 - 📊 **实时监控**：可视化界面展示蜂群活动和代理状态
+- 🌟 **项目向导**：“文章快速写”自动化工作流，集成文件夹选择与任务编排
+- 💥 **裂变模式**：一键生成 1-10 个 AI 实体副本，支持同一 API 商的高并发满载
+- 🔗 **自定义提供商**：支持手动添加 Relay 中转站，灵活配置 URL 与 Header
 - 🔧 **模块化设计**：可扩展的代理系统，支持自定义角色
 
 ### 🏗️ 架构

@@ -15,10 +15,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multi-language compilation support
 - Network discovery for distributed computing
 - API key encryption and usage statistics
+- **Custom Relay Providers** support in `vgs` GUI
+- **Burst Mode** for AI Entities (one-click create 1-10 clones for high concurrency)
+- **New Project Wizard** for "Article Quick-Write" workflow
+- **Prototype Quick-Build** modes for Website, Software, and Games
+- **Directory Picker** integration for Windows using `rfd`
+- Automated specialized file structures (HTML5/Tailwind/Phaser.js) and task submission for new projects
 
 ### Changed
 
-- N/A
+- Refactored API Entity creation form to include Provider Picker and Burst settings
+- Switched default `vgs` layout to show New Project wizard on startup
+- Improved UI responsiveness and auto-wrapping for long resource configurations
 
 ### Deprecated
 

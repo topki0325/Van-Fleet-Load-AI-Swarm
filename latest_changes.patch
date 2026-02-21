@@ -1,0 +1,329 @@
+From efb1e0b0431b5a478546e44911caa5faa68b067a Mon Sep 17 00:00:00 2001
+From: Administrator <admin@example.com>
+Date: Sat, 21 Feb 2026 19:02:20 +0800
+Subject: [PATCH] =?UTF-8?q?fix:=20=E4=B8=BAOllama=E7=B1=BB=E5=9E=8B?=
+ =?UTF-8?q?=E6=B7=BB=E5=8A=A0Serialize=20trait?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- 为OllamaConnectionStatus添加Serialize/Deserialize派生宏
+- 为OllamaUsageStats和ModelUsageStats添加Serialize/Deserialize派生宏
+- 修复Tauri命令序列化错误
+- 删除重复的README-en.md文件
+---
+ README-en.md                       |  90 ----------------------
+ README.md                          | 119 ++++++++++++++++++++++++++---
+ src/backend/ollama_client/types.rs |   6 +-
+ 3 files changed, 110 insertions(+), 105 deletions(-)
+ delete mode 100644 README-en.md
+
+diff --git a/README-en.md b/README-en.md
+deleted file mode 100644
+index d1a4000..0000000
+--- a/README-en.md
++++ /dev/null
+@@ -1,90 +0,0 @@
+-# Vangriten AI Swarm
+-
+-[![CI](https://github.com/topki0325/Vangriten-AI-swarm/workflows/CI/badge.svg)](https://github.com/topki0325/Vangriten-AI-swarm/actions)
+-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+-
+-Vangriten AI Swarm is a high-concurrency AI swarm framework built with Rust, designed to coordinate multiple AI agents for collaborative development.
+-
+-## ✨ Features
+-
+-- 🚀 **High-Concurrency Execution**: Gatling-style scheduling system supporting thousands of AI agents working simultaneously
+-- 🔒 **Enterprise-Grade Security**: AES-256 encrypted API key storage with comprehensive resource consumption tracking
+-- 🌐 **Distributed Architecture**: Automatic LAN discovery with support for calling remote AI and GPU resources
+-- 🛠️ **Multi-Language Support**: Complete compilation environment management for GCC, Conda, Rust, and more
+-- 🤖 **Local AI Models**: Full integration with Ollama, supporting various open-source AI models running locally
+-- 📊 **Real-Time Monitoring**: Visual interface displaying swarm activity and agent status
+-- 🔧 **Modular Design**: Extensible agent system supporting custom roles
+-
+-## 🏗️ Architecture
+-
+-```text
+-VGA = Vangriten Gatling AI
+-├── V = Vangriten (Autonomous AI Orchestration)
+-├── G = Gatling (High-Concurrency Rotational Scheduling)
+-└── A = Architecture / AI / Autonomous (Three-Layer Architecture)
+-```
+-
+-## 🚀 Quick Start
+-
+-### System Requirements
+-
+-- Rust 1.70+
+-- Node.js 18+
+-- Supported OS: Windows, macOS, Linux
+-
+-### Installation
+-
+-```bash
+-git clone https://github.com/topki0325/Vangriten-AI-swarm.git
+-cd vga-swarm
+-cargo build --release
+-```
+-
+-### Running
+-
+-```bash
+-cargo run
+-```
+-
+-If you want to use the **Rust native GUI (without WebView)** (recommended):
+-
+-```bash
+-cargo run -p vgs
+-```
+-
+-On Windows, the corresponding executable files are:
+-
+-- `target/debug/vgs.exe` (dev build)
+-- `target/release/vgs.exe` (release build)
+-
+-The GUI window title is: `vas`.
+-
+-If you prefer using the Tauri CLI (optional):
+-
+-```bash
+-cargo install tauri-cli
+-cargo tauri dev
+-```
+-
+-## 📖 Documentation
+-
+-For detailed documentation, please see [docs/README-en.md](./docs/README-en.md) (English) or [docs/README.md](./docs/README.md) (Chinese).
+-
+-## 🤝 Contributing
+-
+-We welcome contributions of all kinds! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
+-
+-## 📄 License
+-
+-This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+-
+-## 🙏 Acknowledgments
+-
+-- [Tauri](https://tauri.app/) - Desktop application framework
+-- [Rust](https://www.rust-lang.org/) - Systems programming language
+-- All contributors
+-
+-## 📞 Contact
+-
+-- Project Homepage: [https://github.com/topki0325/Vangriten-AI-swarm](https://github.com/topki0325/Vangriten-AI-swarm)
+-- Issues: [https://github.com/topki0325/Vangriten-AI-swarm/issues](https://github.com/topki0325/Vangriten-AI-swarm/issues)
+diff --git a/README.md b/README.md
+index 30717ad..6781d50 100644
+--- a/README.md
++++ b/README.md
+@@ -3,9 +3,104 @@
+ [![CI](https://github.com/topki0325/Vangriten-AI-swarm/workflows/CI/badge.svg)](https://github.com/topki0325/Vangriten-AI-swarm/actions)
+ [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+ 
++[English](#english) | [中文](#中文)
++
++---
++
++## English
++
++Vangriten AI Swarm is a high-concurrency AI swarm framework built with Rust, designed to coordinate multiple AI agents for collaborative development.
++
++### ✨ Features
++
++- 🚀 **High-Concurrency Execution**: Gatling-style scheduling system supporting thousands of AI agents working simultaneously
++- 🔒 **Enterprise-Grade Security**: AES-256 encrypted API keys with complete resource consumption statistics
++- 🌐 **Distributed Architecture**: LAN auto-discovery, supporting remote AI and GPU resource calls
++- 🛠️ **Multi-Language Support**: Complete compilation environment management for GCC, Conda, Rust, etc.
++- 🤖 **Local AI Models**: Fully integrated Ollama, supporting running various open-source AI models locally
++- 📊 **Real-time Monitoring**: Visual interface displaying swarm activity and agent status
++- 🔧 **Modular Design**: Extensible agent system supporting custom roles
++
++### 🏗️ Architecture
++
++```
++VGA = Vangriten Gatling AI
++├── V = Vangriten (Autonomous AI Orchestration)
++├── G = Gatling (High-Concurrency Rotary Scheduling)
++└── A = Architecture / AI / Autonomous (Three-Layer Architecture)
++```
++
++### 🚀 Quick Start
++
++#### System Requirements
++
++- Rust 1.70+
++- Node.js 18+
++- Supported OS: Windows, macOS, Linux
++
++#### Installation
++
++```bash
++git clone https://github.com/topki0325/vga-swarm.git
++cd vga-swarm
++cargo build --release
++```
++
++#### Running
++
++```bash
++cargo run
++```
++
++For **Rust Native GUI (No WebView)** (Recommended):
++
++```bash
++cargo run -p vgs
++```
++
++Windows executables:
++- `target/debug/vgs.exe` (dev build)
++- `target/release/vgs.exe` (release build)
++
++GUI window title: `vas`
++
++If you prefer Tauri CLI (Optional):
++
++```bash
++cargo install tauri-cli
++cargo tauri dev
++```
++
++### 📖 Documentation
++
++Detailed documentation: [docs/README-en.md](./docs/README-en.md) (English) or [docs/README.md](./docs/README.md) (Chinese).
++
++### 🤝 Contributing
++
++We welcome contributions of all kinds! See [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
++
++### 📄 License
++
++This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
++
++### 🙏 Acknowledgments
++
++- [Tauri](https://tauri.app/) - Desktop application framework
++- [Rust](https://www.rust-lang.org/) - Systems programming language
++- All contributors
++
++### 📞 Contact
++
++- Project Home: [https://github.com/topki0325/Vangriten-AI-swarm](https://github.com/topki0325/Vangriten-AI-swarm)
++- Issues: [https://github.com/topki0325/Vangriten-AI-swarm/issues](https://github.com/topki0325/Vangriten-AI-swarm/issues)
++
++---
++
++## 中文
++
+ Vangriten AI Swarm 是一个高并发 AI 蜂群框架，基于 Rust 构建，旨在协调多个 AI 代理进行协作开发。
+ 
+-## ✨ 特性
++### ✨ 特性
+ 
+ - 🚀 **高并发执行**：加特林式调度系统，支持数千个 AI 代理同时工作
+ - 🔒 **企业级安全**：AES-256 加密 API 密钥，完整的资源消耗统计
+@@ -15,24 +110,24 @@ Vangriten AI Swarm 是一个高并发 AI 蜂群框架，基于 Rust 构建，旨
+ - 📊 **实时监控**：可视化界面展示蜂群活动和代理状态
+ - 🔧 **模块化设计**：可扩展的代理系统，支持自定义角色
+ 
+-## 🏗️ 架构
++### 🏗️ 架构
+ 
+-```text
++```
+ VGA = Vangriten Gatling AI
+ ├── V = Vangriten (自主 AI 编排)
+ ├── G = Gatling (高并发旋转调度)
+ └── A = Architecture / AI / Autonomous (三层架构)
+ ```
+ 
+-## 🚀 快速开始
++### 🚀 快速开始
+ 
+-### 系统要求
++#### 系统要求
+ 
+ - Rust 1.70+
+ - Node.js 18+
+ - 支持的操作系统：Windows, macOS, Linux
+ 
+-### 安装
++#### 安装
+ 
+ ```bash
+ git clone https://github.com/topki0325/vga-swarm.git
+@@ -40,7 +135,7 @@ cd vga-swarm
+ cargo build --release
+ ```
+ 
+-### 运行
++#### 运行
+ 
+ ```bash
+ cargo run
+@@ -66,25 +161,25 @@ cargo install tauri-cli
+ cargo tauri dev
+ ```
+ 
+-## 📖 文档
++### 📖 文档
+ 
+ 详细文档请查看 [docs/README.md](./docs/README.md)（中文）或 [docs/README-en.md](./docs/README-en.md)（英文）。
+ 
+-## 🤝 贡献
++### 🤝 贡献
+ 
+ 我们欢迎各种形式的贡献！请查看 [CONTRIBUTING.md](./CONTRIBUTING.md) 了解详情。
+ 
+-## 📄 许可证
++### 📄 许可证
+ 
+ 本项目采用 MIT 许可证 - 查看 [LICENSE](./LICENSE) 文件了解详情。
+ 
+-## 🙏 致谢
++### 🙏 致谢
+ 
+ - [Tauri](https://tauri.app/) - 桌面应用框架
+ - [Rust](https://www.rust-lang.org/) - 系统编程语言
+ - 所有贡献者
+ 
+-## 📞 联系
++### 📞 联系
+ 
+ - 项目主页: [https://github.com/topki0325/Vangriten-AI-swarm](https://github.com/topki0325/Vangriten-AI-swarm)
+ - Issues: [https://github.com/topki0325/Vangriten-AI-swarm/issues](https://github.com/topki0325/Vangriten-AI-swarm/issues)
+diff --git a/src/backend/ollama_client/types.rs b/src/backend/ollama_client/types.rs
+index 69a85bc..bee5247 100644
+--- a/src/backend/ollama_client/types.rs
++++ b/src/backend/ollama_client/types.rs
+@@ -155,14 +155,14 @@ pub struct VersionResponse {
+     pub version: String,
+ }
+ 
+-#[derive(Debug, Clone)]
++#[derive(Debug, Clone, Serialize, Deserialize)]
+ pub struct OllamaConnectionStatus {
+     pub is_connected: bool,
+     pub version: Option<String>,
+     pub error: Option<String>,
+ }
+ 
+-#[derive(Debug, Clone, Default)]
++#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+ pub struct OllamaUsageStats {
+     pub total_requests: u64,
+     pub total_tokens: u64,
+@@ -170,7 +170,7 @@ pub struct OllamaUsageStats {
+     pub model_stats: HashMap<String, ModelUsageStats>,
+ }
+ 
+-#[derive(Debug, Clone, Default)]
++#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+ pub struct ModelUsageStats {
+     pub requests: u64,
+     pub tokens: u64,
+-- 
+2.49.0.windows.1
+

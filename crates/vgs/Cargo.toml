@@ -8,6 +8,7 @@ vas-core = { path = "../vas-core" }
 
 eframe = { version = "0.27" }
 egui-chinese-font = "0.1"
+rfd = "0.14"
 
 tokio = { version = "1.0", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
