@@ -31,10 +31,10 @@ VAS = Vangriten AI Swarm
 │   └── Inspired by the famous DDoS attack technique
 ├── A = AI (Artificial Intelligence Agents)
 │   └── Coordinated autonomous AI systems
-└── S = Swarm (Distributed Coordination)
-    ├── Swarm: Multi-agent coordination framework
-    ├── Distributed: Network-based resource sharing
-    └── Coordination: Intelligent task distribution
+└── S = Swarm (Distributed Multi-Agent System)
+    ├── Swarm: Distributed multi-agent coordination framework
+    ├── Multi-Agent: Collaborative AI agent ecosystem
+    └── System: Intelligent resource and task orchestration
 ```
 
 **Vangriten Concept**: Named after the sophisticated DDoS attack that demonstrated unprecedented saturation capabilities, this framework applies similar swarm coordination principles to AI agent orchestration.
@@ -129,10 +129,10 @@ VAS = Vangriten AI Swarm
 │   └── 灵感来源于著名的 DDoS 攻击技术
 ├── A = AI (人工智能代理)
 │   └── 协调的自主 AI 系统
-└── S = Swarm (分布式协调)
-    ├── Swarm: 多代理协调框架
-    ├── Distributed: 基于网络的资源共享
-    └── Coordination: 智能任务分配
+└── S = Swarm (分布式多代理系统)
+    ├── Swarm: 分布式多代理协调框架
+    ├── Multi-Agent: 协作式AI代理生态系统
+    └── System: 智能资源和任务编排
 ```
 
 **Vangriten 概念**：以展示前所未有饱和能力的复杂 DDoS 攻击命名，该框架将类似的蜂群协调原理应用于 AI 代理编排。
