@@ -476,6 +476,39 @@ impl VgaGuiApp {
 
         self.show_new_project_wizard = open;
     }
+
+    fn render_no_entity_warning(&mut self, ctx: &eframe::egui::Context) {
+        if !self.show_no_entity_warning {
+            return;
+        }
+
+        let title = self.tr("无法新建项目", "Cannot Create Project");
+        let content = self.tr(
+            "目前没有任何 AI 实体可用。请先在 'API' 视图中添加至少一个 OpenAI、DeepSeek 或 Ollama 大模型实体，并确保 API Key 或本地模型已设置好。",
+            "No AI entities available. Please add at least one AI entity (OpenAI, DeepSeek, or Ollama) in the 'API' view first, and ensure API keys or local models are configured.",
+        );
+
+        let mut open = self.show_no_entity_warning;
+        eframe::egui::Window::new(title)
+            .collapsible(false)
+            .resizable(false)
+            .anchor(eframe::egui::Align2::CENTER_CENTER, [0.0, 0.0])
+            .open(&mut open)
+            .show(ctx, |ui| {
+                ui.vertical_centered(|ui| {
+                    ui.add_space(8.0);
+                    ui.label(eframe::egui::RichText::new("⚠").size(32.0).color(eframe::egui::Color32::YELLOW));
+                    ui.add_space(8.0);
+                    ui.label(content);
+                    ui.add_space(12.0);
+                    if ui.button(self.tr("好的，去设置", "OK, Go to API View")).clicked() {
+                        self.active_view = crate::app_types::ActiveView::Api;
+                        self.show_no_entity_warning = false;
+                    }
+                });
+            });
+        self.show_no_entity_warning = open;
+    }
 }
 
 impl eframe::App for VgaGuiApp {
@@ -488,8 +521,20 @@ impl eframe::App for VgaGuiApp {
 
         eframe::egui::TopBottomPanel::top("top_menu").show(ctx, |ui| {
             eframe::egui::menu::bar(ui, |ui| {
+                let menu_file = self.tr("文件", "File");
                 let menu_label = self.tr("菜单", "Menu");
                 let lang_label = self.tr("语言", "Language");
+
+                ui.menu_button(menu_file, |ui| {
+                    if ui.button(self.tr("➕ 新建项目", "➕ New Project")).clicked() {
+                        if self.ai_entities.is_empty() {
+                            self.show_no_entity_warning = true;
+                        } else {
+                            self.show_new_project_wizard = true;
+                        }
+                        ui.close_menu();
+                    }
+                });
 
                 ui.menu_button(menu_label, |ui| {
                     if ui.button(self.tr("刷新", "Refresh")).clicked() {
@@ -525,7 +570,7 @@ impl eframe::App for VgaGuiApp {
                 });
 
                 ui.with_layout(eframe::egui::Layout::right_to_left(eframe::egui::Align::Center), |ui| {
-                    ui.strong(self.tr("vas", "vas"));
+                    ui.strong("Van Fleet Load AI Swarm");
                 });
             });
 
@@ -537,15 +582,12 @@ impl eframe::App for VgaGuiApp {
 
         self.render_api_manager_window(ctx);
         self.render_new_project_wizard(ctx);
+        self.render_no_entity_warning(ctx);
 
         eframe::egui::SidePanel::left("left_nav")
             .resizable(false)
             .default_width(170.0)
             .show(ctx, |ui| {
-                if ui.button(self.tr("➕ 新建项目", "➕ New Project")).clicked() {
-                    self.show_new_project_wizard = true;
-                }
-                ui.add_space(6.0);
                 ui.heading(self.tr("功能", "Views"));
                 ui.separator();
 

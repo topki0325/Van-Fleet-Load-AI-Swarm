@@ -68,7 +68,7 @@ pub enum ProjectStatus {
     Failed,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct ExecutionStats {
     pub total_tokens: u64,
     pub total_duration: std::time::Duration,

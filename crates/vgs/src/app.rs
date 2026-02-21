@@ -22,6 +22,7 @@ pub struct VgaGuiApp {
 
     // New Project wizard (default open on launch)
     pub show_new_project_wizard: bool,
+    pub show_no_entity_warning: bool,
     pub new_project_kind: String,
     pub new_project_root_dir: String,
     pub new_project_name: String,
@@ -168,7 +169,8 @@ impl VgaGuiApp {
             task_target: "code".to_string(),
             task_context: "Generate a simple function".to_string(),
 
-            show_new_project_wizard: true,
+            show_new_project_wizard: false, // Don't show by default anymore, we'll check later
+            show_no_entity_warning: false,
             new_project_kind: "文章快速写".to_string(),
             new_project_root_dir: "projects".to_string(),
             new_project_name: "article-quick".to_string(),
@@ -252,6 +254,11 @@ impl VgaGuiApp {
 
         app.refresh_all();
         app.load_entities();
+
+        if !app.ai_entities.is_empty() {
+            app.show_new_project_wizard = true;
+        }
+
         app
     }
 

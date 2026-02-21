@@ -239,6 +239,12 @@ impl VgaGuiApp {
         let master_entity = self.article_master_entity.trim().to_string();
         let groups_count = self.article_groups_count.clamp(1, 10) as usize;
 
+        // Build assignments
+        let mut assignments = self.article_group_assignments.clone();
+        if assignments.len() != groups_count {
+            assignments = vec![master_entity.clone(); groups_count];
+        }
+
         let root = std::path::PathBuf::from(root_dir);
         let project_dir = root.join(&project_name);
         if let Err(e) = std::fs::create_dir_all(&project_dir) {

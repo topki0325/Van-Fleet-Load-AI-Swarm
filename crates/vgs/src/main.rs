@@ -10,13 +10,13 @@ mod app_ui;      // render_api_manager_window + eframe::App impl
 fn main() -> eframe::Result<()> {
     let native_options = eframe::NativeOptions {
         viewport: eframe::egui::ViewportBuilder::default()
-            .with_title("vas")
+            .with_title("Van Fleet Load AI Swarm")
             .with_inner_size([1100.0, 700.0]),
         ..Default::default()
     };
 
     eframe::run_native(
-        "vas",
+        "van-fleet-load-ai-swarm",
         native_options,
         Box::new(|cc| {
             if let Err(err) = egui_chinese_font::setup_chinese_fonts(&cc.egui_ctx) {
