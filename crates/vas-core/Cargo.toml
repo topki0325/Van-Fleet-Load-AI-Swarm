@@ -1,0 +1,33 @@
+[package]
+name = "vas-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+crossbeam = "0.8"
+mdns = "3.0"
+
+# HTTP client (used by backend/ollama_client)
+reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls"] }
+
+aes-gcm = "0.10"
+rand = "0.8"
+argon2 = "0.5"
+
+anyhow = "1.0"
+thiserror = "1.0"
+
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+async-trait = "0.1"
+path-absolutize = "3.1"
+
+sys-info = "0.9"
+num_cpus = "1.16"

@@ -1,3 +1,4 @@
 pub mod frontend;
-pub mod backend;
-pub mod shared;
+
+pub use vas_core::backend;
+pub use vas_core::shared;

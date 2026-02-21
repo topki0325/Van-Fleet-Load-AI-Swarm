@@ -11,6 +11,7 @@ Vangriten AI Swarm 是一个高并发 AI 蜂群框架，基于 Rust 构建，旨
 - 🔒 **企业级安全**：AES-256 加密 API 密钥，完整的资源消耗统计
 - 🌐 **分布式架构**：局域网自动发现，支持调用远程 AI 和 GPU 资源
 - 🛠️ **多语言支持**：GCC、Conda、Rust 等完整编译环境管理
+- 🤖 **本地 AI 模型**：完整集成 Ollama，支持在本地运行多种开源 AI 模型
 - 📊 **实时监控**：可视化界面展示蜂群活动和代理状态
 - 🔧 **模块化设计**：可扩展的代理系统，支持自定义角色
 
@@ -48,7 +49,7 @@ cargo run
 如果你想使用 **Rust 原生 GUI（无 WebView）**（推荐）：
 
 ```bash
-cargo run --features native-gui --bin vgs
+cargo run -p vgs
 ```
 
 Windows 下对应可执行文件为：
@@ -67,7 +68,7 @@ cargo tauri dev
 
 ## 📖 文档
 
-详细文档请查看 [docs/README.md](./docs/README.md)
+详细文档请查看 [docs/README.md](./docs/README.md)（中文）或 [docs/README-en.md](./docs/README-en.md)（英文）。
 
 ## 🤝 贡献
 

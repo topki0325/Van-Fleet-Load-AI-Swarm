@@ -281,6 +281,43 @@ pub fn get_predefined_providers() -> Vec<ProviderConfig> {
             requires_api_key: true,
             description: "Hugging Face提供开源模型推理API。".to_string(),
         },
+        
+        // 本地AI服务提供商
+        ProviderConfig {
+            id: "ollama".to_string(),
+            name: "Ollama".to_string(),
+            region: ProviderRegion::Global,
+            api_endpoint: "http://localhost:11434/api/chat".to_string(),
+            models: vec![
+                "llama3".to_string(),
+                "llama3:8b".to_string(),
+                "llama3:70b".to_string(),
+                "llama2".to_string(),
+                "mistral".to_string(),
+                "mistral:7b".to_string(),
+                "mixtral".to_string(),
+                "mixtral:8x7b".to_string(),
+                "codellama".to_string(),
+                "codellama:7b".to_string(),
+                "codellama:13b".to_string(),
+                "gemma".to_string(),
+                "gemma:2b".to_string(),
+                "gemma:7b".to_string(),
+                "phi3".to_string(),
+                "phi3:mini".to_string(),
+                "qwen".to_string(),
+                "qwen:7b".to_string(),
+                "qwen:14b".to_string(),
+            ],
+            pricing: PricingInfo {
+                currency: "USD".to_string(),
+                input_price_per_1k: 0.0,
+                output_price_per_1k: 0.0,
+                free_tier_limit: None,
+            },
+            requires_api_key: false,
+            description: "Ollama是一个开源的大语言模型运行环境，支持在本地运行多种开源模型，无需API密钥，完全免费。".to_string(),
+        },
     ]
 }
 
@@ -288,6 +325,7 @@ pub fn get_provider_by_id(id: &str) -> Option<ProviderConfig> {
     get_predefined_providers().into_iter().find(|p| p.id == id)
 }
 
+#[allow(dead_code)]
 pub fn get_providers_by_region(region: ProviderRegion) -> Vec<ProviderConfig> {
     get_predefined_providers()
         .into_iter()

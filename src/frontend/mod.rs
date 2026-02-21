@@ -468,3 +468,151 @@ pub async fn cmd_list_resource_pools(
 ) -> Result<Vec<crate::shared::models::ResourcePool>, String> {
     Ok(state.resource_manager.list_resource_pools().await)
 }
+
+#[tauri::command]
+pub async fn cmd_list_gcc_instances(
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<Vec<crate::backend::c_compiler::CGccInstance>, String> {
+    Ok(state.c_compiler.list_gcc_instances().await)
+}
+
+#[tauri::command]
+pub async fn cmd_get_c_compiler_status(
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<crate::backend::c_compiler::CCompilationStatus, String> {
+    Ok(state.c_compiler.get_status().await)
+}
+
+#[tauri::command]
+pub async fn cmd_compile_c_round_robin(
+    source_files: Vec<String>,
+    output_path: String,
+    optimization_level: String,
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<crate::backend::c_compiler::CCompilationResult, String> {
+    use std::path::PathBuf;
+    
+    let task = crate::backend::c_compiler::CCompilationTask {
+        task_id: uuid::Uuid::new_v4().to_string(),
+        source_files: source_files.into_iter().map(PathBuf::from).collect(),
+        output_path: PathBuf::from(output_path),
+        compiler_flags: vec!["-Wall".to_string(), "-Wextra".to_string()],
+        include_paths: vec![],
+        optimization_level,
+    };
+    
+    state.c_compiler.compile_round_robin(task).await
+        .map_err(|e| format!("Compilation failed: {:?}", e))
+}
+
+#[tauri::command]
+pub async fn cmd_compile_c_parallel(
+    tasks: Vec<crate::backend::c_compiler::CCompilationTask>,
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<Vec<Result<crate::backend::c_compiler::CCompilationResult, String>>, String> {
+    let results = state.c_compiler.compile_parallel(tasks).await;
+    Ok(results.into_iter().map(|r| r.map_err(|e| format!("{:?}", e))).collect())
+}
+
+#[tauri::command]
+pub async fn cmd_ollama_check_connection(
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<crate::backend::ollama_client::OllamaConnectionStatus, String> {
+    Ok(state.ollama_manager.check_connection().await)
+}
+
+#[tauri::command]
+pub async fn cmd_ollama_list_models(
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<Vec<crate::backend::ollama_client::OllamaModel>, String> {
+    state.ollama_manager.list_models().await
+}
+
+#[tauri::command]
+pub async fn cmd_ollama_show_model_info(
+    model_name: String,
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<crate::backend::ollama_client::OllamaModelInfo, String> {
+    state.ollama_manager.show_model_info(&model_name).await
+}
+
+#[tauri::command]
+pub async fn cmd_ollama_pull_model(
+    model_name: String,
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<String, String> {
+    state.ollama_manager.pull_model(&model_name).await
+}
+
+#[tauri::command]
+pub async fn cmd_ollama_delete_model(
+    model_name: String,
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<String, String> {
+    state.ollama_manager.delete_model(&model_name).await
+}
+
+#[tauri::command]
+pub async fn cmd_ollama_chat(
+    request: crate::backend::ollama_client::ChatRequest,
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<crate::backend::ollama_client::ChatResponse, String> {
+    state.ollama_manager.chat(request).await
+}
+
+#[tauri::command]
+pub async fn cmd_ollama_chat_simple(
+    model: String,
+    prompt: String,
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<String, String> {
+    state.ollama_manager.chat_simple(&model, &prompt).await
+}
+
+#[tauri::command]
+pub async fn cmd_ollama_generate(
+    request: crate::backend::ollama_client::GenerateRequest,
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<crate::backend::ollama_client::GenerateResponse, String> {
+    state.ollama_manager.generate(request).await
+}
+
+#[tauri::command]
+pub async fn cmd_ollama_generate_simple(
+    model: String,
+    prompt: String,
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<String, String> {
+    state.ollama_manager.generate_simple(&model, &prompt).await
+}
+
+#[tauri::command]
+pub async fn cmd_ollama_embed(
+    model: String,
+    input: String,
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<Vec<f32>, String> {
+    state.ollama_manager.embed(&model, &input).await
+}
+
+#[tauri::command]
+pub async fn cmd_ollama_get_version(
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<String, String> {
+    state.ollama_manager.get_version().await
+}
+
+#[tauri::command]
+pub async fn cmd_ollama_get_usage_stats(
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<crate::backend::ollama_client::OllamaUsageStats, String> {
+    Ok(state.ollama_manager.get_usage_stats().await)
+}
+
+#[tauri::command]
+pub async fn cmd_ollama_reset_usage_stats(
+    state: State<'_, Arc<BackendServices>>,
+) -> Result<(), String> {
+    state.ollama_manager.reset_usage_stats().await;
+    Ok(())
+}

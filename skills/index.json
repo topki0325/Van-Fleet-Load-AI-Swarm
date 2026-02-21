@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": [
+    {
+      "id": "gui.egui_componentization",
+      "title": "egui 子功能组组件化拆分",
+      "tags": ["rust", "egui", "refactor", "workspace"],
+      "path": "skills/gui/egui-componentization.md"
+    },
+    {
+      "id": "security.api_key_vault",
+      "title": "APIKey 本地加密存储与解锁流程",
+      "tags": ["security", "argon2", "aes-gcm", "rust"],
+      "path": "skills/security/api-key-vault.md"
+    },
+    {
+      "id": "backend.reqwest_error_handling",
+      "title": "reqwest 错误处理与超时策略",
+      "tags": ["rust", "reqwest", "network"],
+      "path": "skills/backend/reqwest-error-handling.md"
+    }
+  ]
+}

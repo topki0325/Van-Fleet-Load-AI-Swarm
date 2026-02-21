@@ -14,7 +14,7 @@
 
     ```bash
     git clone <repo-url>
-    cd Vangriten-AI-swarm
+    cd vga-swarm
     ```
 
 2. **构建项目：**
@@ -26,7 +26,8 @@
 ## 配置
 
 1. **设置 API 密钥：**
-    - 在安全密钥管理器中设置 API 密钥。密钥将进行加密存储。
+    - 在 GUI 顶部菜单中打开 `API管理(API Manager)` 弹窗。
+    - 按提示初始化并设置密码后解锁，再保存/查看各 Provider 的 APIKey（本地加密存储，查看/保存需解锁）。
 
 2. **配置代理：**
     - 定义代理角色和能力。
@@ -39,7 +40,7 @@
 运行 Rust 原生 GUI（无 WebView，推荐）：
 
 ```bash
-cargo run --features native-gui --bin vgs
+cargo run -p vgs
 ```
 
 Windows 下会生成并运行：`target/debug/vgs.exe`。

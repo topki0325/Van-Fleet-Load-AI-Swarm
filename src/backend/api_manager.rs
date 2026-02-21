@@ -1,18 +1,18 @@
-use crate::shared::models::{VgaError, VaultOp, VaultResult};
-use aes_gcm::{Aes256Gcm, Nonce, aead::Aead, KeyInit};
+use crate::backend::provider_config::{get_predefined_providers, get_provider_by_id};
+use crate::shared::models::{VgaError, VaultOp, VaultResult, VaultUsageEntry};
+use aes_gcm::{aead::Aead, Aes256Gcm, KeyInit, Nonce};
+use argon2::Argon2;
 use rand::RngCore;
 use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
 use tokio::sync::RwLock;
-use std::sync::Arc;
-use crate::shared::models::VaultUsageEntry;
-use crate::backend::provider_config::{get_predefined_providers, get_provider_by_id};
 
 #[derive(Clone)]
 pub struct ApiKeyManager {
     vault_path: PathBuf,
-    master_key: Vec<u8>,
+    derived_key: Arc<Mutex<Option<[u8; 32]>>>,
     usage_stats: Arc<RwLock<HashMap<String, UsageStats>>>,
 }
 
@@ -28,24 +28,109 @@ impl ApiKeyManager {
         let vault_path = PathBuf::from("vault/keys.enc");
         fs::create_dir_all(&vault_path.parent().unwrap()).unwrap();
 
-        // In production, this should be securely generated and stored
-        let master_key = b"an example very very secret key."; // 32 bytes
-
         Self {
             vault_path,
-            master_key: master_key.to_vec(),
+            derived_key: Arc::new(Mutex::new(None)),
             usage_stats: Arc::new(RwLock::new(HashMap::new())),
         }
+    }
+
+    #[allow(dead_code)]
+    pub fn vault_is_initialized(&self) -> bool {
+        let dir = self.vault_dir();
+        dir.join("salt.bin").exists() && dir.join("vault_check.enc").exists()
+    }
+
+    #[allow(dead_code)]
+    pub fn vault_is_unlocked(&self) -> bool {
+        self.derived_key
+            .lock()
+            .map(|g| g.is_some())
+            .unwrap_or(false)
+    }
+
+    #[allow(dead_code)]
+    pub fn vault_lock(&self) {
+        if let Ok(mut guard) = self.derived_key.lock() {
+            *guard = None;
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn vault_initialize(&self, password: &str) -> Result<(), VgaError> {
+        if password.trim().is_empty() {
+            return Err(VgaError::AuthVaultError("Password cannot be empty".to_string()));
+        }
+        if self.vault_is_initialized() {
+            return Err(VgaError::AuthVaultError(
+                "Vault already initialized".to_string(),
+            ));
+        }
+
+        let dir = self.vault_dir();
+        fs::create_dir_all(dir)
+            .map_err(|e| VgaError::AuthVaultError(format!("Failed to create vault dir: {e}")))?;
+
+        let mut salt = [0u8; 16];
+        rand::rngs::OsRng.fill_bytes(&mut salt);
+        fs::write(dir.join("salt.bin"), &salt)
+            .map_err(|e| VgaError::AuthVaultError(format!("Failed to write salt: {e}")))?;
+
+        let key = Self::derive_key_from_password(password, &salt)?;
+        let check_plain = b"vas-vault-ok";
+        let check_encrypted = Self::encrypt_with_key(&key, check_plain)?;
+        fs::write(dir.join("vault_check.enc"), check_encrypted)
+            .map_err(|e| VgaError::AuthVaultError(format!("Failed to write vault check: {e}")))?;
+
+        if let Ok(mut guard) = self.derived_key.lock() {
+            *guard = Some(key);
+        }
+
+        Ok(())
+    }
+
+    #[allow(dead_code)]
+    pub fn vault_unlock(&self, password: &str) -> Result<(), VgaError> {
+        if password.trim().is_empty() {
+            return Err(VgaError::AuthVaultError("Password cannot be empty".to_string()));
+        }
+        if !self.vault_is_initialized() {
+            return Err(VgaError::AuthVaultError(
+                "Vault is not initialized".to_string(),
+            ));
+        }
+
+        let dir = self.vault_dir();
+        let salt = fs::read(dir.join("salt.bin"))
+            .map_err(|e| VgaError::AuthVaultError(format!("Failed to read salt: {e}")))?;
+        if salt.len() != 16 {
+            return Err(VgaError::AuthVaultError("Invalid salt".to_string()));
+        }
+
+        let key = Self::derive_key_from_password(password, &salt)?;
+        let check_encrypted = fs::read(dir.join("vault_check.enc"))
+            .map_err(|e| VgaError::AuthVaultError(format!("Failed to read vault check: {e}")))?;
+        let check_plain = Self::decrypt_with_key(&key, &check_encrypted)?;
+        if check_plain != b"vas-vault-ok" {
+            return Err(VgaError::AuthVaultError("Invalid password".to_string()));
+        }
+
+        if let Ok(mut guard) = self.derived_key.lock() {
+            *guard = Some(key);
+        }
+        Ok(())
     }
 
     pub fn vault_operation(&self, op: VaultOp) -> Result<VaultResult, VgaError> {
         match op {
             VaultOp::Store { provider, key } => {
+                self.require_unlocked()?;
                 let encrypted = self.encrypt_key(&key)?;
                 self.persist_to_disk(&provider, &encrypted)?;
                 Ok(VaultResult::Success)
             }
             VaultOp::Retrieve { provider } => {
+                self.require_unlocked()?;
                 let decrypted = self.decrypt_from_disk(&provider)?;
                 self.update_usage_stats(&provider);
                 Ok(VaultResult::Key(decrypted))
@@ -83,6 +168,7 @@ impl ApiKeyManager {
             .map_err(|e| VgaError::AuthVaultError(format!("Failed to write default provider: {e}")))
     }
 
+    #[allow(dead_code)]
     pub fn get_decrypted_key(&self, provider: &str) -> Result<String, VgaError> {
         self.vault_operation(VaultOp::Retrieve { provider: provider.to_string() })
             .and_then(|res| match res {
@@ -126,26 +212,11 @@ impl ApiKeyManager {
 
     pub fn prime_demo_usage(&self) {
         let _ = self.check_quota_availability("local");
-        let _ = self.get_decrypted_key("local");
     }
 
     fn encrypt_key(&self, key: &str) -> Result<Vec<u8>, VgaError> {
-        let cipher = Aes256Gcm::new_from_slice(&self.master_key)
-            .map_err(|e| VgaError::AuthVaultError(format!("Invalid key: {}", e)))?;
-        let mut nonce_bytes = [0u8; 12];
-        rand::rngs::OsRng.fill_bytes(&mut nonce_bytes);
-        let nonce = Nonce::from_slice(&nonce_bytes);
-
-        let ciphertext = cipher
-            .encrypt(nonce, key.as_bytes())
-            .map_err(|e| VgaError::AuthVaultError(e.to_string()))
-            ?;
-
-        // Store nonce + ciphertext so we can decrypt later.
-        let mut out = Vec::with_capacity(nonce_bytes.len() + ciphertext.len());
-        out.extend_from_slice(&nonce_bytes);
-        out.extend_from_slice(&ciphertext);
-        Ok(out)
+        let unlocked = self.get_unlocked_key()?;
+        Self::encrypt_with_key(&unlocked, key.as_bytes())
     }
 
     fn decrypt_from_disk(&self, provider: &str) -> Result<String, VgaError> {
@@ -153,21 +224,76 @@ impl ApiKeyManager {
         let encrypted = fs::read(&file_path)
             .map_err(|e| VgaError::AuthVaultError(format!("Failed to read key file: {}", e)))?;
 
-        if encrypted.len() < 12 {
-            return Err(VgaError::AuthVaultError("Encrypted payload too short".to_string()));
-        }
-
-        let (nonce_bytes, ciphertext) = encrypted.split_at(12);
-
-        let cipher = Aes256Gcm::new_from_slice(&self.master_key)
-            .map_err(|e| VgaError::AuthVaultError(format!("Invalid key: {}", e)))?;
-        let nonce = Nonce::from_slice(nonce_bytes);
-        let decrypted = cipher
-            .decrypt(nonce, ciphertext)
-            .map_err(|e| VgaError::AuthVaultError(format!("Decryption failed: {}", e)))?;
+        let unlocked = self.get_unlocked_key()?;
+        let decrypted = Self::decrypt_with_key(&unlocked, &encrypted)?;
 
         String::from_utf8(decrypted)
             .map_err(|e| VgaError::AuthVaultError(format!("Invalid UTF-8: {}", e)))
+    }
+
+    #[allow(dead_code)]
+    fn vault_dir(&self) -> &std::path::Path {
+        self.vault_path.parent().unwrap()
+    }
+
+    fn require_unlocked(&self) -> Result<(), VgaError> {
+        if self.vault_is_unlocked() {
+            Ok(())
+        } else {
+            Err(VgaError::AuthVaultError(
+                "Vault is locked. Unlock with password to view API keys.".to_string(),
+            ))
+        }
+    }
+
+    fn get_unlocked_key(&self) -> Result<[u8; 32], VgaError> {
+        let guard = self
+            .derived_key
+            .lock()
+            .map_err(|_| VgaError::AuthVaultError("Vault key mutex poisoned".to_string()))?;
+        guard
+            .ok_or_else(|| VgaError::AuthVaultError("Vault is locked".to_string()))
+    }
+
+    #[allow(dead_code)]
+    fn derive_key_from_password(password: &str, salt: &[u8]) -> Result<[u8; 32], VgaError> {
+        let mut out = [0u8; 32];
+        Argon2::default()
+            .hash_password_into(password.as_bytes(), salt, &mut out)
+            .map_err(|e| VgaError::AuthVaultError(format!("KDF failed: {e}")))?;
+        Ok(out)
+    }
+
+    fn encrypt_with_key(key: &[u8; 32], plaintext: &[u8]) -> Result<Vec<u8>, VgaError> {
+        let cipher = Aes256Gcm::new_from_slice(key)
+            .map_err(|e| VgaError::AuthVaultError(format!("Invalid key: {e}")))?;
+
+        let mut nonce_bytes = [0u8; 12];
+        rand::rngs::OsRng.fill_bytes(&mut nonce_bytes);
+        let nonce = Nonce::from_slice(&nonce_bytes);
+
+        let ciphertext = cipher
+            .encrypt(nonce, plaintext)
+            .map_err(|e| VgaError::AuthVaultError(e.to_string()))?;
+
+        let mut out = Vec::with_capacity(nonce_bytes.len() + ciphertext.len());
+        out.extend_from_slice(&nonce_bytes);
+        out.extend_from_slice(&ciphertext);
+        Ok(out)
+    }
+
+    fn decrypt_with_key(key: &[u8; 32], payload: &[u8]) -> Result<Vec<u8>, VgaError> {
+        if payload.len() < 12 {
+            return Err(VgaError::AuthVaultError("Encrypted payload too short".to_string()));
+        }
+        let (nonce_bytes, ciphertext) = payload.split_at(12);
+
+        let cipher = Aes256Gcm::new_from_slice(key)
+            .map_err(|e| VgaError::AuthVaultError(format!("Invalid key: {e}")))?;
+        let nonce = Nonce::from_slice(nonce_bytes);
+        cipher
+            .decrypt(nonce, ciphertext)
+            .map_err(|e| VgaError::AuthVaultError(format!("Decryption failed: {e}")))
     }
 
     fn persist_to_disk(&self, provider: &str, encrypted: &[u8]) -> Result<(), VgaError> {

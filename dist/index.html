@@ -147,6 +147,132 @@
       </div>
       <pre id="pools-output">(not loaded)</pre>
 
+      <h2>C Compiler</h2>
+      <div>
+        <button id="list-gcc">List GCC Instances</button>
+        <button id="get-compiler-status">Get Status</button>
+      </div>
+      <pre id="gcc-output">(not loaded)</pre>
+
+      <h2>C Compilation (Round Robin)</h2>
+      <div>
+        <label>
+          Source Files (comma separated):
+          <input id="c-source-files" value="main.c" />
+        </label>
+        <label>
+          Output Path:
+          <input id="c-output-path" value="target/main" />
+        </label>
+        <label>
+          Optimization Level:
+          <select id="c-optimization">
+            <option value="0">O0 - No optimization</option>
+            <option value="1">O1 - Basic optimization</option>
+            <option value="2" selected>O2 - Recommended</option>
+            <option value="3">O3 - Aggressive</option>
+            <option value="s">Os - Size optimization</option>
+          </select>
+        </label>
+        <button id="compile-c-round-robin">Compile (Round Robin)</button>
+      </div>
+      <pre id="c-round-robin-output">(not compiled)</pre>
+
+      <h2>C Compilation (Parallel)</h2>
+      <div>
+        <label>
+          Tasks (JSON array):
+          <textarea id="c-parallel-tasks" rows="4" cols="80">[
+  {
+    "task_id": "task1",
+    "source_files": ["file1.c"],
+    "output_path": "target/file1",
+    "compiler_flags": ["-Wall"],
+    "include_paths": [],
+    "optimization_level": "2"
+  }
+]</textarea>
+        </label>
+        <button id="compile-c-parallel">Compile (Parallel)</button>
+      </div>
+      <pre id="c-parallel-output">(not compiled)</pre>
+
+      <h2>Ollama</h2>
+      <div>
+        <button id="ollama-check-connection">Check Connection</button>
+        <button id="ollama-list-models">List Models</button>
+        <button id="ollama-get-version">Get Version</button>
+        <button id="ollama-get-usage-stats">Get Usage Stats</button>
+        <button id="ollama-reset-usage-stats">Reset Usage Stats</button>
+      </div>
+      <pre id="ollama-output">(not loaded)</pre>
+
+      <h2>Ollama Model Management</h2>
+      <div>
+        <label>
+          Model Name:
+          <input id="ollama-model-name" value="llama3" />
+        </label>
+        <button id="ollama-pull-model">Pull Model</button>
+        <button id="ollama-delete-model">Delete Model</button>
+        <button id="ollama-show-model-info">Show Model Info</button>
+      </div>
+      <pre id="ollama-model-output">(not loaded)</pre>
+
+      <h2>Ollama Chat (Simple)</h2>
+      <div>
+        <label>
+          Model:
+          <input id="ollama-chat-model" value="llama3" />
+        </label>
+      </div>
+      <div>
+        <label>
+          Prompt:
+          <textarea id="ollama-chat-prompt" rows="4" cols="80">Hello, how are you?</textarea>
+        </label>
+      </div>
+      <div>
+        <button id="ollama-chat-simple">Chat</button>
+      </div>
+      <pre id="ollama-chat-output">(no response)</pre>
+
+      <h2>Ollama Generate (Simple)</h2>
+      <div>
+        <label>
+          Model:
+          <input id="ollama-generate-model" value="llama3" />
+        </label>
+      </div>
+      <div>
+        <label>
+          Prompt:
+          <textarea id="ollama-generate-prompt" rows="4" cols="80">Write a short poem about programming.</textarea>
+        </label>
+      </div>
+      <div>
+        <button id="ollama-generate-simple">Generate</button>
+      </div>
+      <pre id="ollama-generate-output">(no response)</pre>
+
+      <h2>Ollama Embed</h2>
+      <div>
+        <label>
+          Model:
+          <input id="ollama-embed-model" value="llama3" />
+        </label>
+      </div>
+      <div>
+        <label>
+          Input Text:
+          <textarea id="ollama-embed-input" rows="2" cols="80">Hello world</textarea>
+        </label>
+      </div>
+      <div>
+        <button id="ollama-embed">Generate Embedding</button>
+      </div>
+      <pre id="ollama-embed-output">(no embedding)</pre>
+
       <h2>API Providers</h2>
       <div>
         <button id="get-providers">Load Providers</button>
@@ -706,6 +832,174 @@
       });
       document.getElementById('list-pools')?.addEventListener('click', () => {
         listPools().catch((e) => setText('pools-output', String(e)));
+      });
+
+      async function listGccInstances() {
+        const invoke = await getInvoke();
+        const instances = await invoke('cmd_list_gcc_instances');
+        setText('gcc-output', pretty(instances));
+      }
+
+      async function getCompilerStatus() {
+        const invoke = await getInvoke();
+        const status = await invoke('cmd_get_c_compiler_status');
+        setText('gcc-output', pretty(status));
+      }
+
+      async function compileCRoundRobin() {
+        const invoke = await getInvoke();
+        const sourceFiles = document.getElementById('c-source-files')?.value || '';
+        const outputPath = document.getElementById('c-output-path')?.value || 'target/main';
+        const optimizationLevel = document.getElementById('c-optimization')?.value || '2';
+        
+        const files = sourceFiles.split(',').map(s => s.trim()).filter(s => s);
+        
+        const result = await invoke('cmd_compile_c_round_robin', {
+          sourceFiles: files,
+          outputPath,
+          optimizationLevel,
+        });
+        setText('c-round-robin-output', pretty(result));
+      }
+
+      async function compileCParallel() {
+        const invoke = await getInvoke();
+        const tasksJson = document.getElementById('c-parallel-tasks')?.value || '[]';
+        
+        try {
+          const tasks = JSON.parse(tasksJson);
+          const results = await invoke('cmd_compile_c_parallel', { tasks });
+          setText('c-parallel-output', pretty(results));
+        } catch (e) {
+          setText('c-parallel-output', 'Invalid JSON: ' + e);
+        }
+      }
+
+      document.getElementById('list-gcc')?.addEventListener('click', () => {
+        listGccInstances().catch((e) => setText('gcc-output', String(e)));
+      });
+      document.getElementById('get-compiler-status')?.addEventListener('click', () => {
+        getCompilerStatus().catch((e) => setText('gcc-output', String(e)));
+      });
+      document.getElementById('compile-c-round-robin')?.addEventListener('click', () => {
+        compileCRoundRobin().catch((e) => setText('c-round-robin-output', String(e)));
+      });
+      document.getElementById('compile-c-parallel')?.addEventListener('click', () => {
+        compileCParallel().catch((e) => setText('c-parallel-output', String(e)));
+      });
+
+      async function ollamaCheckConnection() {
+        const invoke = await getInvoke();
+        const status = await invoke('cmd_ollama_check_connection');
+        setText('ollama-output', pretty(status));
+      }
+
+      async function ollamaListModels() {
+        const invoke = await getInvoke();
+        const models = await invoke('cmd_ollama_list_models');
+        setText('ollama-output', pretty(models));
+      }
+
+      async function ollamaGetVersion() {
+        const invoke = await getInvoke();
+        const version = await invoke('cmd_ollama_get_version');
+        setText('ollama-output', pretty({ version }));
+      }
+
+      async function ollamaGetUsageStats() {
+        const invoke = await getInvoke();
+        const stats = await invoke('cmd_ollama_get_usage_stats');
+        setText('ollama-output', pretty(stats));
+      }
+
+      async function ollamaResetUsageStats() {
+        const invoke = await getInvoke();
+        await invoke('cmd_ollama_reset_usage_stats');
+        setText('ollama-output', 'Usage stats reset');
+      }
+
+      async function ollamaPullModel() {
+        const invoke = await getInvoke();
+        const modelName = document.getElementById('ollama-model-name')?.value || '';
+        const result = await invoke('cmd_ollama_pull_model', { modelName });
+        setText('ollama-model-output', pretty({ result }));
+      }
+
+      async function ollamaDeleteModel() {
+        const invoke = await getInvoke();
+        const modelName = document.getElementById('ollama-model-name')?.value || '';
+        const result = await invoke('cmd_ollama_delete_model', { modelName });
+        setText('ollama-model-output', pretty({ result }));
+      }
+
+      async function ollamaShowModelInfo() {
+        const invoke = await getInvoke();
+        const modelName = document.getElementById('ollama-model-name')?.value || '';
+        const info = await invoke('cmd_ollama_show_model_info', { modelName });
+        setText('ollama-model-output', pretty(info));
+      }
+
+      async function ollamaChatSimple() {
+        const invoke = await getInvoke();
+        const model = document.getElementById('ollama-chat-model')?.value || 'llama3';
+        const prompt = document.getElementById('ollama-chat-prompt')?.value || '';
+        const response = await invoke('cmd_ollama_chat_simple', { model, prompt });
+        setText('ollama-chat-output', response);
+      }
+
+      async function ollamaGenerateSimple() {
+        const invoke = await getInvoke();
+        const model = document.getElementById('ollama-generate-model')?.value || 'llama3';
+        const prompt = document.getElementById('ollama-generate-prompt')?.value || '';
+        const response = await invoke('cmd_ollama_generate_simple', { model, prompt });
+        setText('ollama-generate-output', response);
+      }
+
+      async function ollamaEmbed() {
+        const invoke = await getInvoke();
+        const model = document.getElementById('ollama-embed-model')?.value || 'llama3';
+        const input = document.getElementById('ollama-embed-input')?.value || '';
+        const embedding = await invoke('cmd_ollama_embed', { model, input });
+        setText('ollama-embed-output', pretty({ 
+          model, 
+          input, 
+          embedding_length: embedding.length,
+          first_10_values: embedding.slice(0, 10)
+        }));
+      }
+
+      document.getElementById('ollama-check-connection')?.addEventListener('click', () => {
+        ollamaCheckConnection().catch((e) => setText('ollama-output', String(e)));
+      });
+      document.getElementById('ollama-list-models')?.addEventListener('click', () => {
+        ollamaListModels().catch((e) => setText('ollama-output', String(e)));
+      });
+      document.getElementById('ollama-get-version')?.addEventListener('click', () => {
+        ollamaGetVersion().catch((e) => setText('ollama-output', String(e)));
+      });
+      document.getElementById('ollama-get-usage-stats')?.addEventListener('click', () => {
+        ollamaGetUsageStats().catch((e) => setText('ollama-output', String(e)));
+      });
+      document.getElementById('ollama-reset-usage-stats')?.addEventListener('click', () => {
+        ollamaResetUsageStats().catch((e) => setText('ollama-output', String(e)));
+      });
+      document.getElementById('ollama-pull-model')?.addEventListener('click', () => {
+        ollamaPullModel().catch((e) => setText('ollama-model-output', String(e)));
+      });
+      document.getElementById('ollama-delete-model')?.addEventListener('click', () => {
+        ollamaDeleteModel().catch((e) => setText('ollama-model-output', String(e)));
+      });
+      document.getElementById('ollama-show-model-info')?.addEventListener('click', () => {
+        ollamaShowModelInfo().catch((e) => setText('ollama-model-output', String(e)));
+      });
+      document.getElementById('ollama-chat-simple')?.addEventListener('click', () => {
+        ollamaChatSimple().catch((e) => setText('ollama-chat-output', String(e)));
+      });
+      document.getElementById('ollama-generate-simple')?.addEventListener('click', () => {
+        ollamaGenerateSimple().catch((e) => setText('ollama-generate-output', String(e)));
+      });
+      document.getElementById('ollama-embed')?.addEventListener('click', () => {
+        ollamaEmbed().catch((e) => setText('ollama-embed-output', String(e)));
       });
 
       // Auto refresh once on load.
