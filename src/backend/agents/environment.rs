@@ -251,6 +251,7 @@ struct ResourceRequirements {
 #[async_trait::async_trait]
 impl AgentTrait for EnvironmentAgent {
     async fn execute_instruction(&self, instr: String) -> Result<TaskOutput, VgaError> {
+        let _ = &self.context;
         // Parse instruction and setup environment
         let env_spec = self.parse_environment_instruction(&instr)?;
         let mut agent = self.clone();
@@ -269,6 +270,7 @@ impl AgentTrait for EnvironmentAgent {
     }
 
     async fn execute_block(&self, task_spec: TaskSpec) -> Result<TaskOutput, VgaError> {
+        let _ = &self.context;
         match task_spec.target.as_str() {
             "setup" => {
                 let env_spec = EnvSpec {

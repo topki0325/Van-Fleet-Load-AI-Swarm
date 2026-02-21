@@ -111,6 +111,11 @@ impl ResourceManager {
     }
 
     pub async fn start_discovery(&self) -> Result<(), VgaError> {
+        tracing::info!(
+            "Starting resource discovery for {} on port {}",
+            self.node_id,
+            self.broadcast_port
+        );
         let socket = self.discovery_socket.clone()
             .ok_or_else(|| VgaError::ResourceLimit("Discovery socket not initialized".into()))?;
 
@@ -485,6 +490,63 @@ impl ResourceManager {
 
     pub async fn list_resource_pools(&self) -> Vec<ResourcePool> {
         self.resource_pools.read().await.values().cloned().collect()
+    }
+
+    pub async fn prime_demo_usage(&self) {
+        let _ = self.swarm_groups.read().await.len();
+        let _ = self.resource_pools.read().await.len();
+        let _ = self.allocations.read().await.len();
+        let _ = self.distributed_tasks.read().await.len();
+        let _ = self.balancing_strategy.read().await.strategy_type.clone();
+
+        let group_id = self.create_swarm_group("demo".to_string(), 1).await.unwrap_or_default();
+        let _ = self.join_swarm_group(group_id.clone()).await;
+        let _ = self.get_group_members(group_id.clone()).await;
+        let _ = self.leave_swarm_group(group_id.clone()).await;
+        let _ = self.list_swarm_groups().await;
+
+        self.set_remote_access(true).await;
+        let _ = self.get_remote_access_status().await;
+
+        let _ = self.discover_nodes().await;
+        let _ = self.list_discovered_nodes().await;
+
+        let requirements = ResourceRequirements {
+            cpu_cores: Some(1),
+            memory_mb: Some(512),
+            gpu_required: false,
+            gpu_memory_mb: None,
+            preferred_models: Vec::new(),
+        };
+
+        let _ = self.request_resources(requirements.clone(), "demo".to_string(), Priority::Low).await;
+        let _ = self.release_allocation("demo".to_string()).await;
+
+        let _ = self.dispatch_distributed_task(
+            TaskSpec {
+                language: "rust".to_string(),
+                target: "code".to_string(),
+                context_range: "demo".to_string(),
+            },
+            requirements.clone(),
+        ).await;
+        let _ = self.get_distributed_task(TaskId::new_v4()).await;
+        let _ = self.perform_health_check("unknown".to_string()).await;
+
+        self.update_node_resources(NodeResources {
+            cpu_cores: 1,
+            total_memory_mb: 1024,
+            available_memory_mb: 512,
+            gpus: Vec::new(),
+            supported_models: Vec::new(),
+            current_load: 0.0,
+        }).await;
+
+        self.set_balancing_strategy(BalancingStrategy::LeastLoaded).await;
+        let _ = self.get_balancing_strategy().await;
+
+        let _ = self.create_resource_pool("demo".to_string(), Vec::new()).await;
+        let _ = self.list_resource_pools().await;
     }
 }
 

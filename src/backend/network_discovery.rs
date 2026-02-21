@@ -30,11 +30,25 @@ impl NetworkDiscovery {
 
     pub fn broadcast_presence(&self) {
         // TODO: Implement mDNS broadcasting
-        tracing::info!("Broadcasting presence as {:?}", self.mode);
+        tracing::info!("Broadcasting presence for {} as {:?}", self.node_id, self.mode);
     }
 
     pub async fn discover_peers(&self) -> Result<Vec<PeerStatus>, VgaError> {
-        // TODO: Implement peer discovery
-        Ok(vec![])
+        let peers = self.discovered_peers.read().await;
+        let out: Vec<PeerStatus> = peers
+            .values()
+            .map(|peer| PeerStatus {
+                id: peer.id.clone(),
+                address: peer.address.clone(),
+                mode: peer.mode.clone(),
+                latency: Some(peer.last_seen.elapsed().as_millis() as u64),
+            })
+            .collect();
+
+        if out.is_empty() {
+            tracing::info!("No peers discovered for {}", self.node_id);
+        }
+
+        Ok(out)
     }
 }

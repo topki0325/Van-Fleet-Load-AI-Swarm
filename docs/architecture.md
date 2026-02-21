@@ -1,16 +1,16 @@
-# VGA (Vangriten Gatling AI)swarm - 核心架构
+# Vangriten AI Swarm - 核心架构
 
 ## 概述
 
-VGA (Vangriten Gatling AI) 是一个用 Rust 构建的高并发 AI 蜂群框架，旨在协调多个 AI 代理在协作工作流中的执行。该框架实现了“加特林机枪”式的旋转调度系统，用于高效的多代理执行，实现自主 AI 驱动的项目管理和开发周期。
+Vangriten AI Swarm 是一个用 Rust 构建的高并发 AI 蜂群框架，旨在协调多个 AI 代理在协作工作流中的执行。该框架实现了"加特林机枪"式的旋转调度系统，用于高效的多代理执行，实现自主 AI 驱动的项目管理和开发周期。
 
 ## 核心架构理念
 
-### VGA = Vangriten Gatling AI
+### Vangriten AI Swarm
 
 - **V = Vangriten**：核心架构理念，强调自主 AI 编排和涌现智能模式
-- **G = Gatling**：高并发旋转调度系统，用于多代理执行
-- **A = Architecture / AI / Autonomous**：三层方法，结合架构设计、AI 代理管理和自主操作
+- **A = AI**：高并发旋转调度系统，用于多代理执行
+- **S = Swarm**：三层方法，结合架构设计、AI 代理管理和自主操作
 
 ### 系统组件
 

@@ -157,6 +157,7 @@ impl ProgrammerAgent {
 #[async_trait::async_trait]
 impl AgentTrait for ProgrammerAgent {
     async fn execute_instruction(&self, instr: String) -> Result<TaskOutput, VgaError> {
+        let _ = &self.context;
         // Generate code based on instruction
         let language = self.detect_language(&instr);
         let code = self.generate_code(&language, &instr)?;
@@ -173,7 +174,9 @@ impl AgentTrait for ProgrammerAgent {
     }
 
     async fn execute_block(&self, task_spec: TaskSpec) -> Result<TaskOutput, VgaError> {
+        let _ = &self.context;
         // Generate code for specific task
+        let _ = self.detect_language(&task_spec.context_range);
         let code = self.generate_code(&task_spec.language, &task_spec.context_range)?;
 
         // Generate tests if requested

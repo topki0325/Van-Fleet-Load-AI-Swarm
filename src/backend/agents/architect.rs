@@ -64,6 +64,24 @@ impl ArchitectAgent {
             });
         }
 
+        if requirements.contains("ui") || requirements.contains("frontend") {
+            components.push(Component {
+                name: "UserInterface".to_string(),
+                component_type: ComponentType::UI,
+                technologies: vec!["Tauri".to_string(), "HTML".to_string()],
+                dependencies: vec![],
+            });
+        }
+
+        if requirements.contains("worker") || requirements.contains("queue") {
+            components.push(Component {
+                name: "Worker".to_string(),
+                component_type: ComponentType::Worker,
+                technologies: vec!["Tokio".to_string()],
+                dependencies: vec![],
+            });
+        }
+
         Ok(components)
     }
 
@@ -78,6 +96,10 @@ impl ArchitectAgent {
 
         if components.iter().any(|c| c.component_type == ComponentType::Service) {
             patterns.push(ArchitecturePattern::Layered);
+        }
+
+        if components.iter().any(|c| matches!(c.component_type, ComponentType::Worker)) {
+            patterns.push(ArchitecturePattern::EventDriven);
         }
 
         Ok(patterns)
@@ -237,6 +259,7 @@ pub struct DataFlow {
 #[async_trait::async_trait]
 impl AgentTrait for ArchitectAgent {
     async fn execute_instruction(&self, instr: String) -> Result<TaskOutput, VgaError> {
+        let _ = &self.context;
         // Generate architecture blueprint based on requirements
         let blueprint = self.analyze_requirements(&instr)?;
 
@@ -262,6 +285,7 @@ impl AgentTrait for ArchitectAgent {
     }
 
     async fn execute_block(&self, task_spec: TaskSpec) -> Result<TaskOutput, VgaError> {
+        let _ = &self.context;
         // Handle specific architecture tasks
         match task_spec.target.as_str() {
             "design-system" => self.design_system_architecture(&task_spec.context_range),

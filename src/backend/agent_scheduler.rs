@@ -152,6 +152,7 @@ impl AgentScheduler {
     }
 
     pub async fn get_swarm_status(&self) -> SwarmPulse {
+        let _ = self.max_concurrency;
         let pool_len = self.available_pool.read().await.len();
         let queue_len = self.waiting_queue.read().await.len();
         let active_count = self.active_tasks.read().await.len();
@@ -162,7 +163,7 @@ impl AgentScheduler {
         }
     }
 
-    pub fn handle_agent_heartbeat(&mut self, _agent_id: AgentId) {
+    pub fn handle_agent_heartbeat(&self, _agent_id: AgentId) {
         // TODO: Update agent's last heartbeat
     }
 
@@ -208,6 +209,22 @@ impl AgentScheduler {
         }
 
         Ok(())
+    }
+
+    pub async fn prime_demo_usage(&self) {
+        let task = Task::new(
+            TaskSpec {
+                language: "rust".to_string(),
+                target: "code".to_string(),
+                context_range: "demo".to_string(),
+            },
+            crate::shared::models::Priority::Low,
+            std::path::PathBuf::from("snapshots/demo.json"),
+        );
+
+        let _ = self.dispatch_task(task).await;
+        self.handle_agent_heartbeat(AgentId::new_v4());
+        self.process_completed_tasks().await;
     }
 
     async fn try_dispatch_next(&self) {

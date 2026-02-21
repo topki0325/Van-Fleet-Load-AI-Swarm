@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Initial release of vga-swarm Framework
+- Initial release of Vangriten AI Swarm Framework
 - Core AI agent orchestration system
 - Tauri-based desktop interface
 - Multi-language compilation support
