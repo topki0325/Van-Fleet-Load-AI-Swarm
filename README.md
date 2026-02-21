@@ -26,15 +26,15 @@ Vangriten AI Swarm is a high-concurrency AI swarm framework built with Rust, des
 Vangriten-AI-Swarm is inspired by the Vangriten DDoS attack technique, reimagined as a coordinated AI agent framework:
 
 ```
-VGA = Vangriten Gatling AI
+VAS = Vangriten AI Swarm
 ├── V = Vangriten (Saturating Attack Pattern)
 │   └── Inspired by the famous DDoS attack technique
-├── G = Gatling (High-Concurrency Rotary Scheduling)
-│   └── Multi-barreled concurrent execution system
-└── A = Autonomous / AI / Architecture (Three-Layer Swarm)
-    ├── Autonomous: Self-organizing agent coordination
-    ├── AI: Intelligent task distribution and optimization
-    └── Architecture: Distributed swarm infrastructure
+├── A = AI (Artificial Intelligence Agents)
+│   └── Coordinated autonomous AI systems
+└── S = Swarm (Distributed Coordination)
+    ├── Swarm: Multi-agent coordination framework
+    ├── Distributed: Network-based resource sharing
+    └── Coordination: Intelligent task distribution
 ```
 
 **Vangriten Concept**: Named after the sophisticated DDoS attack that demonstrated unprecedented saturation capabilities, this framework applies similar swarm coordination principles to AI agent orchestration.
@@ -124,15 +124,15 @@ Vangriten AI Swarm 是一个高并发 AI 蜂群框架，基于 Rust 构建，旨
 Vangriten-AI-Swarm 的灵感来源于 Vangriten DDoS 攻击技术，将其重新想象为协调的 AI 代理框架：
 
 ```
-VGA = Vangriten Gatling AI
+VAS = Vangriten AI Swarm
 ├── V = Vangriten (饱和性攻击模式)
 │   └── 灵感来源于著名的 DDoS 攻击技术
-├── G = Gatling (高并发旋转调度)
-│   └── 多管并发执行系统
-└── A = Autonomous / AI / Architecture (三层蜂群架构)
-    ├── Autonomous: 自组织代理协调
-    ├── AI: 智能任务分配和优化
-    └── Architecture: 分布式蜂群基础设施
+├── A = AI (人工智能代理)
+│   └── 协调的自主 AI 系统
+└── S = Swarm (分布式协调)
+    ├── Swarm: 多代理协调框架
+    ├── Distributed: 基于网络的资源共享
+    └── Coordination: 智能任务分配
 ```
 
 **Vangriten 概念**：以展示前所未有饱和能力的复杂 DDoS 攻击命名，该框架将类似的蜂群协调原理应用于 AI 代理编排。
