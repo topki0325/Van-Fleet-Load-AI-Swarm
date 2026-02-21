@@ -20,9 +20,18 @@ fn main() -> eframe::Result<()> {
 }
 
 #[cfg(feature = "native-gui")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum UiLang {
+    Zh,
+    En,
+}
+
+#[cfg(feature = "native-gui")]
 struct VgaGuiApp {
     runtime: tokio::runtime::Runtime,
     services: std::sync::Arc<vangriten_ai_swarm::backend::BackendServices>,
+
+    lang: UiLang,
 
     // Inputs
     task_language: String,
@@ -82,6 +91,8 @@ impl VgaGuiApp {
             runtime,
             services,
 
+            lang: UiLang::Zh,
+
             task_language: "rust".to_string(),
             task_target: "code".to_string(),
             task_context: "Generate a simple function".to_string(),
@@ -105,6 +116,13 @@ impl VgaGuiApp {
 
         app.refresh_all();
         app
+    }
+
+    fn tr(&self, zh: &'static str, en: &'static str) -> &'static str {
+        match self.lang {
+            UiLang::Zh => zh,
+            UiLang::En => en,
+        }
     }
 
     fn set_error(&mut self, err: impl ToString) {
@@ -307,23 +325,29 @@ impl eframe::App for VgaGuiApp {
 
         eframe::egui::TopBottomPanel::top("top").show(ctx, |ui| {
             ui.horizontal(|ui| {
-                ui.heading("VGA Swarm (Rust GUI)");
+                ui.heading(self.tr("VGA 蜂群（Rust GUI）", "VGA Swarm (Rust GUI)"));
                 ui.separator();
 
-                if ui.button("Refresh").clicked() {
+                ui.label(self.tr("语言：", "Lang:"));
+                ui.selectable_value(&mut self.lang, UiLang::Zh, "中文");
+                ui.selectable_value(&mut self.lang, UiLang::En, "EN");
+                ui.separator();
+
+                if ui.button(self.tr("刷新", "Refresh")).clicked() {
                     self.refresh_all();
                 }
 
-                if ui.button("Deploy Sample Project").clicked() {
+                if ui.button(self.tr("部署示例项目", "Deploy Sample Project")).clicked() {
                     self.deploy_sample_project();
                 }
 
-                if ui.button("Request Sample Compute").clicked() {
+                if ui.button(self.tr("申请示例算力", "Request Sample Compute")).clicked() {
                     self.request_sample_compute();
                 }
 
                 ui.separator();
-                ui.checkbox(&mut self.auto_refresh, "Auto");
+                let auto_label = self.tr("自动", "Auto");
+                ui.checkbox(&mut self.auto_refresh, auto_label);
                 ui.add(
                     eframe::egui::DragValue::new(&mut self.refresh_interval_secs)
                         .clamp_range(1..=60)
@@ -341,21 +365,21 @@ impl eframe::App for VgaGuiApp {
             ui.columns(2, |cols| {
                 // Left: ops
                 cols[0].group(|ui| {
-                    ui.heading("Task");
+                    ui.heading(self.tr("任务", "Task"));
                     ui.horizontal(|ui| {
-                        ui.label("Language");
+                        ui.label(self.tr("语言", "Language"));
                         ui.text_edit_singleline(&mut self.task_language);
-                        ui.label("Target");
+                        ui.label(self.tr("目标", "Target"));
                         ui.text_edit_singleline(&mut self.task_target);
                     });
-                    ui.label("Context");
+                    ui.label(self.tr("上下文", "Context"));
                     ui.text_edit_multiline(&mut self.task_context);
 
                     ui.horizontal(|ui| {
-                        if ui.button("Execute").clicked() {
+                        if ui.button(self.tr("执行", "Execute")).clicked() {
                             self.execute_task();
                         }
-                        if ui.button("Submit").clicked() {
+                        if ui.button(self.tr("提交", "Submit")).clicked() {
                             self.submit_task();
                         }
                     });
@@ -364,29 +388,29 @@ impl eframe::App for VgaGuiApp {
                 cols[0].add_space(8.0);
 
                 cols[0].group(|ui| {
-                    ui.heading("Vault");
+                    ui.heading(self.tr("金库（Vault）", "Vault"));
                     ui.horizontal(|ui| {
-                        ui.label("Provider");
+                        ui.label(self.tr("提供商", "Provider"));
                         ui.text_edit_singleline(&mut self.vault_provider);
                     });
                     ui.horizontal(|ui| {
-                        ui.label("Key");
+                        ui.label(self.tr("密钥", "Key"));
                         ui.add(eframe::egui::TextEdit::singleline(&mut self.vault_key).password(true));
                     });
                     ui.horizontal(|ui| {
-                        if ui.button("Store").clicked() {
+                        if ui.button(self.tr("保存", "Store")).clicked() {
                             self.vault_store();
                         }
-                        if ui.button("Retrieve").clicked() {
+                        if ui.button(self.tr("读取", "Retrieve")).clicked() {
                             self.vault_retrieve();
                         }
-                        if ui.button("List").clicked() {
+                        if ui.button(self.tr("列表", "List")).clicked() {
                             self.vault_list();
                         }
-                        if ui.button("Delete").clicked() {
+                        if ui.button(self.tr("删除", "Delete")).clicked() {
                             self.vault_delete();
                         }
-                        if ui.button("Usage").clicked() {
+                        if ui.button(self.tr("用量", "Usage")).clicked() {
                             self.vault_usage();
                         }
                     });
@@ -399,8 +423,8 @@ impl eframe::App for VgaGuiApp {
                 cols[0].add_space(8.0);
 
                 cols[0].group(|ui| {
-                    ui.heading("Network");
-                    if ui.button("Discover Peers").clicked() {
+                    ui.heading(self.tr("网络", "Network"));
+                    if ui.button(self.tr("发现节点", "Discover Peers")).clicked() {
                         self.discover_peers();
                     }
                     eframe::egui::ScrollArea::vertical().max_height(140.0).show(ui, |ui| {
@@ -410,33 +434,33 @@ impl eframe::App for VgaGuiApp {
 
                 // Right: data
                 cols[1].group(|ui| {
-                    ui.heading("Swarm");
+                    ui.heading(self.tr("蜂群", "Swarm"));
                     ui.monospace(&self.swarm_json);
                 });
                 cols[1].add_space(8.0);
                 cols[1].group(|ui| {
-                    ui.heading("Agents");
+                    ui.heading(self.tr("代理", "Agents"));
                     eframe::egui::ScrollArea::vertical().max_height(140.0).show(ui, |ui| {
                         ui.monospace(&self.agents_json);
                     });
                 });
                 cols[1].add_space(8.0);
                 cols[1].group(|ui| {
-                    ui.heading("Projects");
+                    ui.heading(self.tr("项目", "Projects"));
                     eframe::egui::ScrollArea::vertical().max_height(120.0).show(ui, |ui| {
                         ui.monospace(&self.projects_json);
                     });
                 });
                 cols[1].add_space(8.0);
                 cols[1].group(|ui| {
-                    ui.heading("Leases");
+                    ui.heading(self.tr("租约", "Leases"));
                     eframe::egui::ScrollArea::vertical().max_height(120.0).show(ui, |ui| {
                         ui.monospace(&self.leases_json);
                     });
                 });
                 cols[1].add_space(8.0);
                 cols[1].group(|ui| {
-                    ui.heading("Tasks");
+                    ui.heading(self.tr("任务列表", "Tasks"));
                     eframe::egui::ScrollArea::vertical().max_height(160.0).show(ui, |ui| {
                         ui.monospace(&self.tasks_json);
                     });

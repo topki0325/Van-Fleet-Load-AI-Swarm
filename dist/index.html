@@ -19,6 +19,134 @@
       <h2>Swarm</h2>
       <pre id="swarm">(not loaded)</pre>
 
+      <h2>Resource Manager</h2>
+      <div>
+        <button id="discover-nodes">Discover Nodes</button>
+        <button id="list-nodes">List Nodes</button>
+        <button id="refresh-nodes">Refresh</button>
+      </div>
+      <pre id="nodes-output">(not loaded)</pre>
+
+      <h2>Remote Access</h2>
+      <div>
+        <label>
+          Allow Remote Access:
+          <input type="checkbox" id="remote-access-toggle" />
+        </label>
+        <button id="get-remote-status">Get Status</button>
+      </div>
+      <pre id="remote-access-output">(not loaded)</pre>
+
+      <h2>Swarm Groups</h2>
+      <div>
+        <label>
+          Group Name:
+          <input id="group-name" value="My Swarm Group" />
+        </label>
+        <label>
+          Max Members:
+          <input id="max-members" type="number" value="10" />
+        </label>
+        <button id="create-group">Create Group</button>
+        <button id="list-groups">List Groups</button>
+      </div>
+      <div>
+        <label>
+          Group ID:
+          <input id="group-id" value="" placeholder="group-uuid" />
+        </label>
+        <button id="join-group">Join</button>
+        <button id="leave-group">Leave</button>
+        <button id="get-members">Get Members</button>
+      </div>
+      <pre id="groups-output">(not loaded)</pre>
+
+      <h2>Resource Allocation</h2>
+      <div>
+        <label>
+          CPU Cores:
+          <input id="req-cpu" type="number" value="2" />
+        </label>
+        <label>
+          Memory (MB):
+          <input id="req-memory" type="number" value="4096" />
+        </label>
+        <label>
+          GPU Required:
+          <input type="checkbox" id="req-gpu" />
+        </label>
+        <label>
+          GPU Memory (MB):
+          <input id="req-gpu-memory" type="number" value="8192" />
+        </label>
+      </div>
+      <div>
+        <label>
+          Task Type:
+          <input id="task-type" value="inference" />
+        </label>
+        <label>
+          Priority:
+          <select id="req-priority">
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+            <option value="Critical">Critical</option>
+          </select>
+        </label>
+        <button id="request-resources">Request Resources</button>
+      </div>
+      <div>
+        <label>
+          Allocation ID:
+          <input id="allocation-id" value="" placeholder="allocation-uuid" />
+        </label>
+        <button id="release-allocation">Release</button>
+      </div>
+      <pre id="allocation-output">(not loaded)</pre>
+
+      <h2>Health Check</h2>
+      <div>
+        <label>
+          Node ID:
+          <input id="health-node-id" value="" placeholder="node-uuid" />
+        </label>
+        <button id="perform-health-check">Check Health</button>
+      </div>
+      <pre id="health-output">(not loaded)</pre>
+
+      <h2>Load Balancing</h2>
+      <div>
+        <label>
+          Strategy:
+          <select id="balancing-strategy">
+            <option value="LeastLoaded" selected>Least Loaded</option>
+            <option value="RoundRobin">Round Robin</option>
+            <option value="Weighted">Weighted</option>
+            <option value="Geographic">Geographic</option>
+            <option value="Random">Random</option>
+          </select>
+        </label>
+        <button id="set-strategy">Set Strategy</button>
+        <button id="get-strategy">Get Strategy</button>
+      </div>
+      <pre id="balancing-output">(not loaded)</pre>
+
+      <h2>Resource Pools</h2>
+      <div>
+        <label>
+          Pool Name:
+          <input id="pool-name" value="High Performance Pool" />
+        </label>
+        <label>
+          Node IDs (comma separated):
+          <input id="pool-node-ids" value="" placeholder="node1,node2,node3" />
+        </label>
+        <button id="create-pool">Create Pool</button>
+        <button id="list-pools">List Pools</button>
+      </div>
+      <pre id="pools-output">(not loaded)</pre>
+
       <h2>API Providers</h2>
       <div>
         <button id="get-providers">Load Providers</button>
@@ -408,6 +536,176 @@
       });
       document.getElementById('set-default-provider')?.addEventListener('click', () => {
         setDefaultProvider().catch((e) => setText('provider-config-output', String(e)));
+      });
+
+      async function discoverNodes() {
+        const invoke = await getInvoke();
+        const nodes = await invoke('cmd_discover_nodes');
+        setText('nodes-output', pretty(nodes));
+      }
+
+      async function listNodes() {
+        const invoke = await getInvoke();
+        const nodes = await invoke('cmd_list_discovered_nodes');
+        setText('nodes-output', pretty(nodes));
+      }
+
+      async function setRemoteAccess() {
+        const invoke = await getInvoke();
+        const allow = document.getElementById('remote-access-toggle')?.checked || false;
+        await invoke('cmd_set_remote_access', { allow });
+        setText('remote-access-output', pretty({ remote_access: allow }));
+      }
+
+      async function getRemoteStatus() {
+        const invoke = await getInvoke();
+        const status = await invoke('cmd_get_remote_access_status');
+        setText('remote-access-output', pretty({ remote_access: status }));
+        document.getElementById('remote-access-toggle').checked = status;
+      }
+
+      async function createGroup() {
+        const invoke = await getInvoke();
+        const name = document.getElementById('group-name')?.value || '';
+        const maxMembers = parseInt(document.getElementById('max-members')?.value || '10');
+        const groupId = await invoke('cmd_create_swarm_group', { name, maxMembers });
+        setText('groups-output', pretty({ group_id: groupId }));
+      }
+
+      async function listGroups() {
+        const invoke = await getInvoke();
+        const groups = await invoke('cmd_list_swarm_groups');
+        setText('groups-output', pretty(groups));
+      }
+
+      async function joinGroup() {
+        const invoke = await getInvoke();
+        const groupId = document.getElementById('group-id')?.value || '';
+        await invoke('cmd_join_swarm_group', { groupId });
+        setText('groups-output', pretty({ joined: groupId }));
+      }
+
+      async function leaveGroup() {
+        const invoke = await getInvoke();
+        const groupId = document.getElementById('group-id')?.value || '';
+        await invoke('cmd_leave_swarm_group', { groupId });
+        setText('groups-output', pretty({ left: groupId }));
+      }
+
+      async function getGroupMembers() {
+        const invoke = await getInvoke();
+        const groupId = document.getElementById('group-id')?.value || '';
+        const members = await invoke('cmd_get_group_members', { groupId });
+        setText('groups-output', pretty(members));
+      }
+
+      async function requestResources() {
+        const invoke = await getInvoke();
+        const requirements = {
+          cpu_cores: parseInt(document.getElementById('req-cpu')?.value || '2'),
+          memory_mb: parseInt(document.getElementById('req-memory')?.value || '4096'),
+          gpu_required: document.getElementById('req-gpu')?.checked || false,
+          gpu_memory_mb: parseInt(document.getElementById('req-gpu-memory')?.value || '8192'),
+          preferred_models: [],
+        };
+        const taskType = document.getElementById('task-type')?.value || 'inference';
+        const priority = document.getElementById('req-priority')?.value || 'Medium';
+        const allocation = await invoke('cmd_request_resources', { requirements, taskType, priority });
+        setText('allocation-output', pretty(allocation));
+      }
+
+      async function releaseAllocation() {
+        const invoke = await getInvoke();
+        const allocationId = document.getElementById('allocation-id')?.value || '';
+        await invoke('cmd_release_allocation', { allocationId });
+        setText('allocation-output', pretty({ released: allocationId }));
+      }
+
+      async function performHealthCheck() {
+        const invoke = await getInvoke();
+        const nodeId = document.getElementById('health-node-id')?.value || '';
+        const health = await invoke('cmd_perform_health_check', { nodeId });
+        setText('health-output', pretty(health));
+      }
+
+      async function setBalancingStrategy() {
+        const invoke = await getInvoke();
+        const strategy = document.getElementById('balancing-strategy')?.value || 'LeastLoaded';
+        await invoke('cmd_set_balancing_strategy', { strategy });
+        setText('balancing-output', pretty({ strategy }));
+      }
+
+      async function getBalancingStrategy() {
+        const invoke = await getInvoke();
+        const strategy = await invoke('cmd_get_balancing_strategy');
+        setText('balancing-output', pretty(strategy));
+      }
+
+      async function createPool() {
+        const invoke = await getInvoke();
+        const name = document.getElementById('pool-name')?.value || '';
+        const nodeIdsStr = document.getElementById('pool-node-ids')?.value || '';
+        const nodeIds = nodeIdsStr.split(',').map(s => s.trim()).filter(s => s);
+        const poolId = await invoke('cmd_create_resource_pool', { name, nodeIds });
+        setText('pools-output', pretty({ pool_id: poolId }));
+      }
+
+      async function listPools() {
+        const invoke = await getInvoke();
+        const pools = await invoke('cmd_list_resource_pools');
+        setText('pools-output', pretty(pools));
+      }
+
+      document.getElementById('discover-nodes')?.addEventListener('click', () => {
+        discoverNodes().catch((e) => setText('nodes-output', String(e)));
+      });
+      document.getElementById('list-nodes')?.addEventListener('click', () => {
+        listNodes().catch((e) => setText('nodes-output', String(e)));
+      });
+      document.getElementById('refresh-nodes')?.addEventListener('click', () => {
+        discoverNodes().catch((e) => setText('nodes-output', String(e)));
+      });
+      document.getElementById('remote-access-toggle')?.addEventListener('change', () => {
+        setRemoteAccess().catch((e) => setText('remote-access-output', String(e)));
+      });
+      document.getElementById('get-remote-status')?.addEventListener('click', () => {
+        getRemoteStatus().catch((e) => setText('remote-access-output', String(e)));
+      });
+      document.getElementById('create-group')?.addEventListener('click', () => {
+        createGroup().catch((e) => setText('groups-output', String(e)));
+      });
+      document.getElementById('list-groups')?.addEventListener('click', () => {
+        listGroups().catch((e) => setText('groups-output', String(e)));
+      });
+      document.getElementById('join-group')?.addEventListener('click', () => {
+        joinGroup().catch((e) => setText('groups-output', String(e)));
+      });
+      document.getElementById('leave-group')?.addEventListener('click', () => {
+        leaveGroup().catch((e) => setText('groups-output', String(e)));
+      });
+      document.getElementById('get-members')?.addEventListener('click', () => {
+        getGroupMembers().catch((e) => setText('groups-output', String(e)));
+      });
+      document.getElementById('request-resources')?.addEventListener('click', () => {
+        requestResources().catch((e) => setText('allocation-output', String(e)));
+      });
+      document.getElementById('release-allocation')?.addEventListener('click', () => {
+        releaseAllocation().catch((e) => setText('allocation-output', String(e)));
+      });
+      document.getElementById('perform-health-check')?.addEventListener('click', () => {
+        performHealthCheck().catch((e) => setText('health-output', String(e)));
+      });
+      document.getElementById('set-strategy')?.addEventListener('click', () => {
+        setBalancingStrategy().catch((e) => setText('balancing-output', String(e)));
+      });
+      document.getElementById('get-strategy')?.addEventListener('click', () => {
+        getBalancingStrategy().catch((e) => setText('balancing-output', String(e)));
+      });
+      document.getElementById('create-pool')?.addEventListener('click', () => {
+        createPool().catch((e) => setText('pools-output', String(e)));
+      });
+      document.getElementById('list-pools')?.addEventListener('click', () => {
+        listPools().catch((e) => setText('pools-output', String(e)));
       });
 
       // Auto refresh once on load.
