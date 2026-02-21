@@ -70,13 +70,14 @@ num_cpus = "1.16"
 
 # Optional native Rust GUI (no webview)
 eframe = { version = "0.27", optional = true }
+egui-chinese-font = { version = "0.1", optional = true }
 
 [build-dependencies]
 tauri-build = { version = "1.5", features = [] }
 
 [features]
 # see more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-native-gui = ["eframe"]
+native-gui = ["eframe", "egui-chinese-font"]
 
 [[bin]]
 name = "vgs"

@@ -1587,6 +1587,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "egui-chinese-font"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ac0500b890ade8d098765c6c13f813aa2c93112dc612f8d978db1a4014c2edb4"
+dependencies = [
+ "egui",
+]
+
+[[package]]
 name = "egui-wgpu"
 version = "0.27.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4778,7 +4787,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.4.15",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -6275,6 +6284,7 @@ dependencies = [
  "chrono",
  "crossbeam",
  "eframe",
+ "egui-chinese-font",
  "mdns",
  "num_cpus",
  "path-absolutize",

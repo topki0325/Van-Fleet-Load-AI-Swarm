@@ -7,15 +7,20 @@ fn main() {
 fn main() -> eframe::Result<()> {
     let native_options = eframe::NativeOptions {
         viewport: eframe::egui::ViewportBuilder::default()
-            .with_title("VGA Swarm (Rust GUI)")
+            .with_title("vas")
             .with_inner_size([1100.0, 700.0]),
         ..Default::default()
     };
 
     eframe::run_native(
-        "VGA Swarm (Rust GUI)",
+        "vas",
         native_options,
-        Box::new(|_cc| Box::new(VgaGuiApp::new())),
+        Box::new(|cc| {
+            if let Err(err) = egui_chinese_font::setup_chinese_fonts(&cc.egui_ctx) {
+                eprintln!("Failed to load Chinese fonts: {err}");
+            }
+            Box::new(VgaGuiApp::new())
+        }),
     )
 }
 
@@ -644,7 +649,7 @@ impl eframe::App for VgaGuiApp {
 
         eframe::egui::TopBottomPanel::top("top").show(ctx, |ui| {
             ui.horizontal(|ui| {
-                ui.heading(self.tr("VGA 蜂群（Rust GUI）", "VGA Swarm (Rust GUI)"));
+                ui.heading(self.tr("vas", "vas"));
                 ui.separator();
 
                 ui.label(self.tr("语言：", "Lang:"));
@@ -707,258 +712,346 @@ impl eframe::App for VgaGuiApp {
                 cols[0].add_space(8.0);
 
                 cols[0].group(|ui| {
-                    ui.heading(self.tr("金库（Vault）", "Vault"));
-                    ui.horizontal(|ui| {
-                        ui.label(self.tr("提供商", "Provider"));
-                        ui.text_edit_singleline(&mut self.vault_provider);
-                    });
-                    ui.horizontal(|ui| {
-                        ui.label(self.tr("密钥", "Key"));
-                        ui.add(eframe::egui::TextEdit::singleline(&mut self.vault_key).password(true));
-                    });
-                    ui.horizontal(|ui| {
-                        if ui.button(self.tr("保存", "Store")).clicked() {
-                            self.vault_store();
-                        }
-                        if ui.button(self.tr("读取", "Retrieve")).clicked() {
-                            self.vault_retrieve();
-                        }
-                        if ui.button(self.tr("列表", "List")).clicked() {
-                            self.vault_list();
-                        }
-                        if ui.button(self.tr("删除", "Delete")).clicked() {
-                            self.vault_delete();
-                        }
-                        if ui.button(self.tr("用量", "Usage")).clicked() {
-                            self.vault_usage();
-                        }
-                    });
-                    ui.separator();
-                    eframe::egui::ScrollArea::vertical().max_height(160.0).show(ui, |ui| {
-                        ui.monospace(&self.vault_json);
-                    });
+                    eframe::egui::CollapsingHeader::new(self.tr("金库（Vault）", "Vault"))
+                        .id_source("section_vault")
+                        .default_open(true)
+                        .show(ui, |ui| {
+                            ui.horizontal(|ui| {
+                                ui.label(self.tr("提供商", "Provider"));
+                                ui.text_edit_singleline(&mut self.vault_provider);
+                            });
+                            ui.horizontal(|ui| {
+                                ui.label(self.tr("密钥", "Key"));
+                                ui.add(
+                                    eframe::egui::TextEdit::singleline(&mut self.vault_key)
+                                        .password(true),
+                                );
+                            });
+                            ui.horizontal(|ui| {
+                                if ui.button(self.tr("保存", "Store")).clicked() {
+                                    self.vault_store();
+                                }
+                                if ui.button(self.tr("读取", "Retrieve")).clicked() {
+                                    self.vault_retrieve();
+                                }
+                                if ui.button(self.tr("列表", "List")).clicked() {
+                                    self.vault_list();
+                                }
+                                if ui.button(self.tr("删除", "Delete")).clicked() {
+                                    self.vault_delete();
+                                }
+                                if ui.button(self.tr("用量", "Usage")).clicked() {
+                                    self.vault_usage();
+                                }
+                            });
+                            ui.separator();
+                            eframe::egui::ScrollArea::vertical()
+                                .id_source("vault_json_scroll")
+                                .max_height(160.0)
+                                .show(ui, |ui| {
+                                    ui.monospace(&self.vault_json);
+                                });
+                        });
                 });
 
                 cols[0].add_space(8.0);
 
                 cols[0].group(|ui| {
-                    ui.heading(self.tr("网络", "Network"));
-                    if ui.button(self.tr("发现节点", "Discover Peers")).clicked() {
-                        self.discover_peers();
-                    }
-                    eframe::egui::ScrollArea::vertical().max_height(140.0).show(ui, |ui| {
-                        ui.monospace(&self.peers_json);
-                    });
+                    eframe::egui::CollapsingHeader::new(self.tr("网络", "Network"))
+                        .id_source("section_network")
+                        .default_open(false)
+                        .show(ui, |ui| {
+                            if ui.button(self.tr("发现节点", "Discover Peers")).clicked() {
+                                self.discover_peers();
+                            }
+                            eframe::egui::ScrollArea::vertical()
+                                .id_source("peers_json_scroll")
+                                .max_height(140.0)
+                                .show(ui, |ui| {
+                                    ui.monospace(&self.peers_json);
+                                });
+                        });
                 });
 
                 cols[0].add_space(8.0);
 
                 cols[0].group(|ui| {
-                    ui.heading(self.tr("API 提供商", "API Providers"));
+                    eframe::egui::CollapsingHeader::new(self.tr("API 提供商", "API Providers"))
+                        .id_source("section_providers")
+                        .default_open(false)
+                        .show(ui, |ui| {
+                            eframe::egui::CollapsingHeader::new(self.tr("列表", "List"))
+                                .id_source("providers_sub_list")
+                                .default_open(true)
+                                .show(ui, |ui| {
+                                    ui.horizontal(|ui| {
+                                        let label_filter = self.tr("筛选：", "Filter:");
+                                        let label_all = self.tr("全部", "All");
+                                        let label_china = self.tr("中国", "China");
+                                        let label_usa = self.tr("美国", "USA");
+                                        let label_global = self.tr("全球", "Global");
 
-                    ui.horizontal(|ui| {
-                        let label_filter = self.tr("筛选：", "Filter:");
-                        let label_all = self.tr("全部", "All");
-                        let label_china = self.tr("中国", "China");
-                        let label_usa = self.tr("美国", "USA");
-                        let label_global = self.tr("全球", "Global");
+                                        ui.label(label_filter);
+                                        ui.selectable_value(
+                                            &mut self.provider_filter,
+                                            ProviderFilter::All,
+                                            label_all,
+                                        );
+                                        ui.selectable_value(
+                                            &mut self.provider_filter,
+                                            ProviderFilter::China,
+                                            label_china,
+                                        );
+                                        ui.selectable_value(
+                                            &mut self.provider_filter,
+                                            ProviderFilter::USA,
+                                            label_usa,
+                                        );
+                                        ui.selectable_value(
+                                            &mut self.provider_filter,
+                                            ProviderFilter::Global,
+                                            label_global,
+                                        );
 
-                        ui.label(label_filter);
-                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::All, label_all);
-                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::China, label_china);
-                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::USA, label_usa);
-                        ui.selectable_value(&mut self.provider_filter, ProviderFilter::Global, label_global);
+                                        if ui.button(self.tr("加载", "Load")).clicked() {
+                                            self.load_providers();
+                                        }
+                                    });
 
-                        if ui.button(self.tr("加载", "Load")).clicked() {
-                            self.load_providers();
-                        }
-                    });
+                                    eframe::egui::ScrollArea::vertical()
+                                        .id_source("providers_json_scroll")
+                                        .max_height(160.0)
+                                        .show(ui, |ui| {
+                                            ui.monospace(&self.providers_json);
+                                        });
+                                });
 
-                    eframe::egui::ScrollArea::vertical().max_height(160.0).show(ui, |ui| {
-                        ui.monospace(&self.providers_json);
-                    });
+                            ui.separator();
 
-                    ui.separator();
+                            eframe::egui::CollapsingHeader::new(self.tr("配置", "Config"))
+                                .id_source("providers_sub_config")
+                                .default_open(false)
+                                .show(ui, |ui| {
+                                    ui.horizontal(|ui| {
+                                        ui.label(self.tr("Provider ID", "Provider ID"));
+                                        ui.text_edit_singleline(&mut self.provider_id);
+                                        if ui.button(self.tr("获取配置", "Get Config")).clicked() {
+                                            self.get_provider_config();
+                                        }
+                                        if ui.button(self.tr("设为默认", "Set Default")).clicked() {
+                                            self.set_default_provider();
+                                        }
+                                    });
 
-                    ui.horizontal(|ui| {
-                        ui.label(self.tr("Provider ID", "Provider ID"));
-                        ui.text_edit_singleline(&mut self.provider_id);
-                        if ui.button(self.tr("获取配置", "Get Config")).clicked() {
-                            self.get_provider_config();
-                        }
-                        if ui.button(self.tr("设为默认", "Set Default")).clicked() {
-                            self.set_default_provider();
-                        }
-                    });
-
-                    eframe::egui::ScrollArea::vertical().max_height(140.0).show(ui, |ui| {
-                        ui.monospace(&self.provider_config_json);
-                    });
+                                    eframe::egui::ScrollArea::vertical()
+                                        .id_source("provider_config_json_scroll")
+                                        .max_height(140.0)
+                                        .show(ui, |ui| {
+                                            ui.monospace(&self.provider_config_json);
+                                        });
+                                });
+                        });
                 });
 
                 cols[0].add_space(8.0);
 
                 cols[0].group(|ui| {
-                    ui.heading(self.tr("资源管理", "Resources"));
+                    eframe::egui::CollapsingHeader::new(self.tr("资源管理", "Resources"))
+                        .id_source("section_resources")
+                        .default_open(false)
+                        .show(ui, |ui| {
+                            eframe::egui::CollapsingHeader::new(self.tr("节点", "Nodes"))
+                                .id_source("resources_sub_nodes")
+                                .default_open(true)
+                                .show(ui, |ui| {
+                                    ui.horizontal(|ui| {
+                                        let label_allow_remote = self.tr("允许远程", "Allow remote");
+                                        if ui.button(self.tr("发现节点", "Discover Nodes")).clicked() {
+                                            self.discover_nodes();
+                                        }
+                                        if ui.button(self.tr("列出节点", "List Nodes")).clicked() {
+                                            self.list_discovered_nodes();
+                                        }
+                                        if ui.button(self.tr("读取远程开关", "Get Remote Status")).clicked() {
+                                            self.get_remote_access_status();
+                                        }
+                                        if ui.button(self.tr("应用远程开关", "Set Remote Status")).clicked() {
+                                            self.set_remote_access();
+                                        }
+                                        ui.checkbox(&mut self.allow_remote_access, label_allow_remote);
+                                    });
+                                });
 
-                    ui.horizontal(|ui| {
-                        let label_allow_remote = self.tr("允许远程", "Allow remote");
-                        if ui.button(self.tr("发现节点", "Discover Nodes")).clicked() {
-                            self.discover_nodes();
-                        }
-                        if ui.button(self.tr("列出节点", "List Nodes")).clicked() {
-                            self.list_discovered_nodes();
-                        }
-                        if ui.button(self.tr("读取远程开关", "Get Remote Status")).clicked() {
-                            self.get_remote_access_status();
-                        }
-                        if ui.button(self.tr("应用远程开关", "Set Remote Status")).clicked() {
-                            self.set_remote_access();
-                        }
-                        ui.checkbox(&mut self.allow_remote_access, label_allow_remote);
-                    });
+                            ui.separator();
 
-                    ui.horizontal(|ui| {
-                        ui.label(self.tr("策略", "Strategy"));
-                        let label_least_loaded = self.tr("最小负载", "LeastLoaded");
-                        let label_round_robin = self.tr("轮询", "RoundRobin");
-                        let label_random = self.tr("随机", "Random");
-                        ui.selectable_value(
-                            &mut self.balancing_strategy,
-                            vangriten_ai_swarm::shared::models::BalancingStrategy::LeastLoaded,
-                            label_least_loaded,
-                        );
-                        ui.selectable_value(
-                            &mut self.balancing_strategy,
-                            vangriten_ai_swarm::shared::models::BalancingStrategy::RoundRobin,
-                            label_round_robin,
-                        );
-                        ui.selectable_value(
-                            &mut self.balancing_strategy,
-                            vangriten_ai_swarm::shared::models::BalancingStrategy::Random,
-                            label_random,
-                        );
+                            eframe::egui::CollapsingHeader::new(self.tr("策略", "Strategy"))
+                                .id_source("resources_sub_strategy")
+                                .default_open(false)
+                                .show(ui, |ui| {
+                                    ui.horizontal(|ui| {
+                                        ui.label(self.tr("策略", "Strategy"));
+                                        let label_least_loaded = self.tr("最小负载", "LeastLoaded");
+                                        let label_round_robin = self.tr("轮询", "RoundRobin");
+                                        let label_random = self.tr("随机", "Random");
+                                        ui.selectable_value(
+                                            &mut self.balancing_strategy,
+                                            vangriten_ai_swarm::shared::models::BalancingStrategy::LeastLoaded,
+                                            label_least_loaded,
+                                        );
+                                        ui.selectable_value(
+                                            &mut self.balancing_strategy,
+                                            vangriten_ai_swarm::shared::models::BalancingStrategy::RoundRobin,
+                                            label_round_robin,
+                                        );
+                                        ui.selectable_value(
+                                            &mut self.balancing_strategy,
+                                            vangriten_ai_swarm::shared::models::BalancingStrategy::Random,
+                                            label_random,
+                                        );
 
-                        if ui.button(self.tr("设置", "Set")).clicked() {
-                            self.set_balancing_strategy();
-                        }
-                        if ui.button(self.tr("读取", "Get")).clicked() {
-                            self.get_balancing_strategy();
-                        }
-                    });
+                                        if ui.button(self.tr("设置", "Set")).clicked() {
+                                            self.set_balancing_strategy();
+                                        }
+                                        if ui.button(self.tr("读取", "Get")).clicked() {
+                                            self.get_balancing_strategy();
+                                        }
+                                    });
+                                });
 
-                    ui.separator();
+                            ui.separator();
 
-                    ui.horizontal(|ui| {
-                        ui.label(self.tr("Group 名称", "Group name"));
-                        ui.text_edit_singleline(&mut self.group_name);
-                        ui.label(self.tr("最大成员", "Max"));
-                        ui.add(eframe::egui::DragValue::new(&mut self.group_max_members).clamp_range(1..=10_000));
-                        if ui.button(self.tr("创建组", "Create")).clicked() {
-                            self.create_swarm_group();
-                        }
-                    });
+                            eframe::egui::CollapsingHeader::new(self.tr("Swarm 组", "Swarm Groups"))
+                                .id_source("resources_sub_groups")
+                                .default_open(false)
+                                .show(ui, |ui| {
+                                    ui.horizontal(|ui| {
+                                        ui.label(self.tr("Group 名称", "Group name"));
+                                        ui.text_edit_singleline(&mut self.group_name);
+                                        ui.label(self.tr("最大成员", "Max"));
+                                        ui.add(
+                                            eframe::egui::DragValue::new(&mut self.group_max_members)
+                                                .clamp_range(1..=10_000),
+                                        );
+                                        if ui.button(self.tr("创建组", "Create")).clicked() {
+                                            self.create_swarm_group();
+                                        }
+                                    });
 
-                    ui.horizontal(|ui| {
-                        ui.label(self.tr("Group ID", "Group ID"));
-                        ui.text_edit_singleline(&mut self.group_id);
-                        if ui.button(self.tr("加入", "Join")).clicked() {
-                            self.join_swarm_group();
-                        }
-                        if ui.button(self.tr("离开", "Leave")).clicked() {
-                            self.leave_swarm_group();
-                        }
-                        if ui.button(self.tr("列出组", "List")).clicked() {
-                            self.list_swarm_groups();
-                        }
-                        if ui.button(self.tr("成员", "Members")).clicked() {
-                            self.get_group_members();
-                        }
-                    });
+                                    ui.horizontal(|ui| {
+                                        ui.label(self.tr("Group ID", "Group ID"));
+                                        ui.text_edit_singleline(&mut self.group_id);
+                                        if ui.button(self.tr("加入", "Join")).clicked() {
+                                            self.join_swarm_group();
+                                        }
+                                        if ui.button(self.tr("离开", "Leave")).clicked() {
+                                            self.leave_swarm_group();
+                                        }
+                                        if ui.button(self.tr("列出组", "List")).clicked() {
+                                            self.list_swarm_groups();
+                                        }
+                                        if ui.button(self.tr("成员", "Members")).clicked() {
+                                            self.get_group_members();
+                                        }
+                                    });
+                                });
 
-                    ui.separator();
+                            ui.separator();
 
-                    ui.horizontal(|ui| {
-                        ui.label(self.tr("Pool 名称", "Pool name"));
-                        ui.text_edit_singleline(&mut self.pool_name);
-                        ui.label(self.tr("节点IDs (逗号)", "Node IDs (csv)"));
-                        ui.text_edit_singleline(&mut self.pool_node_ids_csv);
-                    });
-                    ui.horizontal(|ui| {
-                        if ui.button(self.tr("创建 Pool", "Create Pool")).clicked() {
-                            self.create_resource_pool();
-                        }
-                        if ui.button(self.tr("列出 Pools", "List Pools")).clicked() {
-                            self.list_resource_pools();
-                        }
-                    });
+                            eframe::egui::CollapsingHeader::new(self.tr("资源池", "Resource Pools"))
+                                .id_source("resources_sub_pools")
+                                .default_open(false)
+                                .show(ui, |ui| {
+                                    ui.horizontal(|ui| {
+                                        ui.label(self.tr("Pool 名称", "Pool name"));
+                                        ui.text_edit_singleline(&mut self.pool_name);
+                                        ui.label(self.tr("节点IDs (逗号)", "Node IDs (csv)"));
+                                        ui.text_edit_singleline(&mut self.pool_node_ids_csv);
+                                    });
+                                    ui.horizontal(|ui| {
+                                        if ui.button(self.tr("创建 Pool", "Create Pool")).clicked() {
+                                            self.create_resource_pool();
+                                        }
+                                        if ui.button(self.tr("列出 Pools", "List Pools")).clicked() {
+                                            self.list_resource_pools();
+                                        }
+                                    });
+                                });
 
-                    ui.separator();
+                            ui.separator();
 
-                    ui.horizontal(|ui| {
-                        ui.label(self.tr("任务类型", "Task type"));
-                        ui.text_edit_singleline(&mut self.req_task_type);
-                        ui.label(self.tr("优先级", "Priority"));
-                        let label_priority_low = self.tr("低", "Low");
-                        let label_priority_medium = self.tr("中", "Medium");
-                        let label_priority_high = self.tr("高", "High");
-                        let label_priority_critical = self.tr("紧急", "Critical");
-                        ui.selectable_value(
-                            &mut self.req_priority,
-                            vangriten_ai_swarm::shared::models::Priority::Low,
-                            label_priority_low,
-                        );
-                        ui.selectable_value(
-                            &mut self.req_priority,
-                            vangriten_ai_swarm::shared::models::Priority::Medium,
-                            label_priority_medium,
-                        );
-                        ui.selectable_value(
-                            &mut self.req_priority,
-                            vangriten_ai_swarm::shared::models::Priority::High,
-                            label_priority_high,
-                        );
-                        ui.selectable_value(
-                            &mut self.req_priority,
-                            vangriten_ai_swarm::shared::models::Priority::Critical,
-                            label_priority_critical,
-                        );
-                    });
-                    ui.horizontal(|ui| {
-                        let label_gpu_required = self.tr("需要GPU", "GPU");
-                        ui.label(self.tr("CPU cores", "CPU cores"));
-                        ui.text_edit_singleline(&mut self.req_cpu_cores);
-                        ui.label(self.tr("内存MB", "Memory MB"));
-                        ui.text_edit_singleline(&mut self.req_memory_mb);
-                        ui.checkbox(&mut self.req_gpu_required, label_gpu_required);
-                        ui.label(self.tr("GPU MB", "GPU MB"));
-                        ui.text_edit_singleline(&mut self.req_gpu_memory_mb);
-                    });
-                    ui.horizontal(|ui| {
-                        ui.label(self.tr("偏好模型(csv)", "Models (csv)"));
-                        ui.text_edit_singleline(&mut self.req_preferred_models_csv);
-                        if ui.button(self.tr("申请资源", "Request")).clicked() {
-                            self.request_resources();
-                        }
-                    });
-                    ui.horizontal(|ui| {
-                        ui.label(self.tr("Allocation ID", "Allocation ID"));
-                        ui.text_edit_singleline(&mut self.allocation_id);
-                        if ui.button(self.tr("释放", "Release")).clicked() {
-                            self.release_allocation();
-                        }
-                    });
-                    ui.horizontal(|ui| {
-                        ui.label(self.tr("Node ID", "Node ID"));
-                        ui.text_edit_singleline(&mut self.node_id);
-                        if ui.button(self.tr("健康检查", "Health Check")).clicked() {
-                            self.perform_health_check();
-                        }
-                    });
+                            eframe::egui::CollapsingHeader::new(self.tr("资源申请", "Allocations"))
+                                .id_source("resources_sub_allocations")
+                                .default_open(true)
+                                .show(ui, |ui| {
+                                    ui.horizontal(|ui| {
+                                        ui.label(self.tr("任务类型", "Task type"));
+                                        ui.text_edit_singleline(&mut self.req_task_type);
+                                        ui.label(self.tr("优先级", "Priority"));
+                                        let label_priority_low = self.tr("低", "Low");
+                                        let label_priority_medium = self.tr("中", "Medium");
+                                        let label_priority_high = self.tr("高", "High");
+                                        let label_priority_critical = self.tr("紧急", "Critical");
+                                        ui.selectable_value(
+                                            &mut self.req_priority,
+                                            vangriten_ai_swarm::shared::models::Priority::Low,
+                                            label_priority_low,
+                                        );
+                                        ui.selectable_value(
+                                            &mut self.req_priority,
+                                            vangriten_ai_swarm::shared::models::Priority::Medium,
+                                            label_priority_medium,
+                                        );
+                                        ui.selectable_value(
+                                            &mut self.req_priority,
+                                            vangriten_ai_swarm::shared::models::Priority::High,
+                                            label_priority_high,
+                                        );
+                                        ui.selectable_value(
+                                            &mut self.req_priority,
+                                            vangriten_ai_swarm::shared::models::Priority::Critical,
+                                            label_priority_critical,
+                                        );
+                                    });
+                                    ui.horizontal(|ui| {
+                                        let label_gpu_required = self.tr("需要GPU", "GPU");
+                                        ui.label(self.tr("CPU cores", "CPU cores"));
+                                        ui.text_edit_singleline(&mut self.req_cpu_cores);
+                                        ui.label(self.tr("内存MB", "Memory MB"));
+                                        ui.text_edit_singleline(&mut self.req_memory_mb);
+                                        ui.checkbox(&mut self.req_gpu_required, label_gpu_required);
+                                        ui.label(self.tr("GPU MB", "GPU MB"));
+                                        ui.text_edit_singleline(&mut self.req_gpu_memory_mb);
+                                    });
+                                    ui.horizontal(|ui| {
+                                        ui.label(self.tr("偏好模型(csv)", "Models (csv)"));
+                                        ui.text_edit_singleline(&mut self.req_preferred_models_csv);
+                                        if ui.button(self.tr("申请资源", "Request")).clicked() {
+                                            self.request_resources();
+                                        }
+                                    });
+                                    ui.horizontal(|ui| {
+                                        ui.label(self.tr("Allocation ID", "Allocation ID"));
+                                        ui.text_edit_singleline(&mut self.allocation_id);
+                                        if ui.button(self.tr("释放", "Release")).clicked() {
+                                            self.release_allocation();
+                                        }
+                                    });
+                                    ui.horizontal(|ui| {
+                                        ui.label(self.tr("Node ID", "Node ID"));
+                                        ui.text_edit_singleline(&mut self.node_id);
+                                        if ui.button(self.tr("健康检查", "Health Check")).clicked() {
+                                            self.perform_health_check();
+                                        }
+                                    });
 
-                    eframe::egui::ScrollArea::vertical().max_height(160.0).show(ui, |ui| {
-                        ui.monospace(&self.resource_json);
-                    });
+                                    eframe::egui::ScrollArea::vertical()
+                                        .id_source("resource_json_scroll")
+                                        .max_height(160.0)
+                                        .show(ui, |ui| {
+                                            ui.monospace(&self.resource_json);
+                                        });
+                                });
+                        });
                 });
 
                 // Right: data
@@ -969,28 +1062,40 @@ impl eframe::App for VgaGuiApp {
                 cols[1].add_space(8.0);
                 cols[1].group(|ui| {
                     ui.heading(self.tr("代理", "Agents"));
-                    eframe::egui::ScrollArea::vertical().max_height(140.0).show(ui, |ui| {
+                    eframe::egui::ScrollArea::vertical()
+                        .id_source("agents_json_scroll")
+                        .max_height(140.0)
+                        .show(ui, |ui| {
                         ui.monospace(&self.agents_json);
                     });
                 });
                 cols[1].add_space(8.0);
                 cols[1].group(|ui| {
                     ui.heading(self.tr("项目", "Projects"));
-                    eframe::egui::ScrollArea::vertical().max_height(120.0).show(ui, |ui| {
+                    eframe::egui::ScrollArea::vertical()
+                        .id_source("projects_json_scroll")
+                        .max_height(120.0)
+                        .show(ui, |ui| {
                         ui.monospace(&self.projects_json);
                     });
                 });
                 cols[1].add_space(8.0);
                 cols[1].group(|ui| {
                     ui.heading(self.tr("租约", "Leases"));
-                    eframe::egui::ScrollArea::vertical().max_height(120.0).show(ui, |ui| {
+                    eframe::egui::ScrollArea::vertical()
+                        .id_source("leases_json_scroll")
+                        .max_height(120.0)
+                        .show(ui, |ui| {
                         ui.monospace(&self.leases_json);
                     });
                 });
                 cols[1].add_space(8.0);
                 cols[1].group(|ui| {
                     ui.heading(self.tr("任务列表", "Tasks"));
-                    eframe::egui::ScrollArea::vertical().max_height(160.0).show(ui, |ui| {
+                    eframe::egui::ScrollArea::vertical()
+                        .id_source("tasks_json_scroll")
+                        .max_height(160.0)
+                        .show(ui, |ui| {
                         ui.monospace(&self.tasks_json);
                     });
                 });

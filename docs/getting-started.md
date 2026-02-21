@@ -5,7 +5,7 @@
 在开始使用 Vangriten AI Swarm 之前，请确保您的系统已安装以下组件：
 
 - **Rust 1.70+** (通过 rustup 安装)
-- **Node.js 18+** (用于 Tauri 前端)
+- **Node.js 18+** (仅在使用可选的 Tauri 前端时需要)
 - **目标 AI 提供商的 API 密钥** (如 OpenAI, Anthropic 等)
 
 ## 安装
@@ -36,22 +36,30 @@
 
 ## 运行
 
-运行开发环境（推荐）：
-
-```bash
-cargo tauri dev
-```
-
-运行 Rust 原生 GUI（无 WebView，可选）：
+运行 Rust 原生 GUI（无 WebView，推荐）：
 
 ```bash
 cargo run --features native-gui --bin vgs
+```
+
+Windows 下会生成并运行：`target/debug/vgs.exe`。
+
+如果你需要 Tauri 前端（可选）：
+
+```bash
+cargo tauri dev
 ```
 
 运行已编译的二进制文件：
 
 ```bash
 ./target/release/vangriten-ai-swarm
+```
+
+或运行原生 GUI 的 release 产物（Windows）：
+
+```bash
+./target/release/vgs.exe
 ```
 
 ## 网络发现

@@ -45,11 +45,18 @@ cargo build --release
 cargo run
 ```
 
-如果你想使用 **Rust 原生 GUI（无 WebView）**：
+如果你想使用 **Rust 原生 GUI（无 WebView）**（推荐）：
 
 ```bash
 cargo run --features native-gui --bin vgs
 ```
+
+Windows 下对应可执行文件为：
+
+- `target/debug/vgs.exe`（dev 构建）
+- `target/release/vgs.exe`（release 构建）
+
+GUI 窗口标题为：`vas`。
 
 如果你偏好使用 Tauri CLI（可选）：
 

@@ -5,7 +5,13 @@
 ## 当前状态
 
 - ✅ `cargo build` / `cargo check` 可通过（Windows 环境已验证）
-- ✅ Tauri 后端命令可用，前端占位页可通过 `invoke` 调用并展示数据
+- ✅ Rust 原生 GUI（`egui/eframe`）已可用：`cargo run --features native-gui --bin vgs`
+  - Windows 产物：`target/debug/vgs.exe`（dev）/ `target/release/vgs.exe`（release）
+  - GUI 窗口标题：`vas`
+  - 中文字体：已接入 `egui-chinese-font`，中文可正确显示
+  - 左侧操作区已按子功能折叠（下拉/折叠菜单），避免按钮堆叠
+  - 已为多个 `ScrollArea` 显式设置唯一 `id_source`，避免 ID 冲突
+- ✅ Tauri 后端命令仍可用（可选路径），前端占位页可通过 `invoke` 调用并展示数据
 - ✅ 基础 CI 已添加（GitHub Actions：Windows 上 `cargo check` + `cargo build`）
 - ✅ 任务生命周期命令已接入（提交/查询/列表/取消）并可追踪队列与运行中数量
 
@@ -56,13 +62,16 @@
 ## 如何验证（建议顺序）
 
 1. 构建：`cargo build`
-2. 运行：`cargo run`
-3. 在窗口里：
-   - 点 `Refresh` 看到 agents/swarm
-   - 点 `Deploy Sample Project` 后 `Projects` 增加
-   - 点 `Request Sample Compute` 后 `Leases` 增加
-   - 在 `Execute Task` 填写内容后点击 `Execute`，看到 `TaskOutput`
-   - Vault 面板可 Store/Retrieve/List/Delete/Usage
+2. 运行（原生 GUI 推荐）：`cargo run --features native-gui --bin vgs`
+3. 在 GUI 窗口里：
+  - 左侧折叠菜单可展开/收起：Vault / Network / Providers / Resources
+  - 点 `刷新(Refresh)` 看到 agents/swarm
+  - 点 `部署示例项目(Deploy Sample Project)` 后 `Projects` 增加
+  - 点 `申请示例算力(Request Sample Compute)` 后 `Leases` 增加
+  - 在 `任务(Task)` 区填写内容后点击 `执行(Execute)`，看到 `TaskOutput`
+  - Vault 区可 Store/Retrieve/List/Delete/Usage
+
+（可选）如果你需要验证 Tauri 路径：`cargo tauri dev`
 
 ## 已知限制/技术债
 
@@ -70,6 +79,7 @@
 - agents 的“智能逻辑”是占位实现（主要用于验证调用链路），未接入真实模型/工具
 - 仍存在部分 `dead_code` 类 warning（结构体字段暂未读写），不影响运行
 - 任务调度与队列是内存实现，尚无持久化与重启恢复
+- 构建会提示 `net2 v0.2.39` future-incompat warning（当前不影响编译/运行）
 
 ## 下一步（推荐）
 
