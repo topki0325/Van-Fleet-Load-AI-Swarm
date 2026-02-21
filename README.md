@@ -23,12 +23,13 @@ Vangriten AI Swarm is a high-concurrency AI swarm framework built with Rust, des
 
 ### 🏗️ Architecture
 
-Vangriten-AI-Swarm is inspired by the Vangriten DDoS attack technique, reimagined as a coordinated AI agent framework:
+Vangriten-AI-Swarm draws inspiration from the "Van Fleet ammunition load" - the legendary artillery barrage tactic from the Korean War, reimagined as a coordinated AI agent framework:
 
 ```
 VAS = Vangriten AI Swarm
-├── V = Vangriten (Saturating Attack Pattern)
-│   └── Inspired by the famous DDoS attack technique
+├── V = Vangriten (Van Fleet Ammunition Load)
+│   └── Inspired by the overwhelming artillery barrage tactic
+│       that consumed massive ammunition in the Korean War
 ├── A = AI (Artificial Intelligence Agents)
 │   └── Coordinated autonomous AI systems
 └── S = Swarm (Collaborative AI Agent Collective)
@@ -37,7 +38,7 @@ VAS = Vangriten AI Swarm
     └── Collective: Unified AI agent ecosystem for complex tasks
 ```
 
-**Vangriten Concept**: Named after the sophisticated DDoS attack that demonstrated unprecedented saturation capabilities, this framework applies similar swarm coordination principles to AI agent orchestration.
+**Vangriten Concept**: Named after General James Van Fleet's legendary artillery tactic during the Korean War, where unprecedented ammunition consumption (36,000 artillery shells in 9 days for a single hill) demonstrated overwhelming firepower saturation. This framework applies similar saturation principles to AI agent coordination and resource orchestration.
 
 ### 🚀 Quick Start
 
@@ -121,12 +122,13 @@ Vangriten AI Swarm 是一个高并发 AI 蜂群框架，基于 Rust 构建，旨
 
 ### 🏗️ 架构
 
-Vangriten-AI-Swarm 的灵感来源于 Vangriten DDoS 攻击技术，将其重新想象为协调的 AI 代理框架：
+Vangriten-AI-Swarm 的灵感来源于朝鲜战争中的"范弗里特弹药量" - 传奇的火力压制战术，将其重新想象为协调的 AI 代理框架：
 
 ```
 VAS = Vangriten AI Swarm
-├── V = Vangriten (饱和性攻击模式)
-│   └── 灵感来源于著名的 DDoS 攻击技术
+├── V = Vangriten (范弗里特弹药量)
+│   └── 灵感来源于朝鲜战争中的压倒性火炮轰击战术
+│       9天内消耗3.6万发炮弹夺取一座小山的传奇战例
 ├── A = AI (人工智能代理)
 │   └── 协调的自主 AI 系统
 └── S = Swarm (协作式AI代理集群)
@@ -135,7 +137,7 @@ VAS = Vangriten AI Swarm
     └── Collective: 统一AI代理生态系统处理复杂任务
 ```
 
-**Vangriten 概念**：以展示前所未有饱和能力的复杂 DDoS 攻击命名，该框架将类似的蜂群协调原理应用于 AI 代理编排。
+**Vangriten 概念**：以朝鲜战争中范弗里特将军的传奇火炮战术命名，当时前所未有的弹药消耗量（9天内3.6万发炮弹夺取一座小山）展示了压倒性的火力饱和能力。该框架将类似的饱和原理应用于 AI 代理协调和资源编排。
 
 ### 🚀 快速开始
 
