@@ -446,7 +446,7 @@ async fn build_local_status(
 ) -> PeerStatus {
     let name = local_name.read().await.clone();
     let groups = local_groups.read().await.clone();
-    let offer = local_offer.read().await.clone();
+    let offer: OllamaOfferStatus = local_offer.read().await.clone();
 
     PeerStatus {
         id: node_id.to_string(),

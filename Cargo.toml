@@ -13,6 +13,7 @@ members = [
 	"crates/vgs",
 	"crates/vgs-discovery",
 	"crates/vas-ollama-share",
+	"crates/ollama-lan-share",
 ]
 
 [dependencies]
@@ -40,6 +41,11 @@ tauri = { version = "1.5", features = [
 # Serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+
+# Packet authentication for LAN discovery (HMAC)
+hmac = "0.12"
+sha2 = "0.10"
+hex = "0.4"
 
 # UUID generation
 uuid = { version = "1.0", features = ["v4", "serde"] }

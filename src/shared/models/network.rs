@@ -27,6 +27,13 @@ pub struct OllamaOfferStatus {
     pub base_url: Option<String>,
     #[serde(default)]
     pub models: Vec<String>,
+
+    // Optional application-layer auth for calling the shared Ollama endpoint.
+    // Discovery itself remains unauthenticated.
+    #[serde(default)]
+    pub auth_required: bool,
+    #[serde(default)]
+    pub proxy_port: Option<u16>,
 }
 
 // ─── Build pipeline ───────────────────────────────────────────────────────────

@@ -104,8 +104,65 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 
 ### 📞 Contact
 
+- Email: 259901434@qq.com
 - Project Home: [https://github.com/topki0325/Van-Fleet-Load-AI-Swarm](https://github.com/topki0325/Van-Fleet-Load-AI-Swarm)
 - Issues: [https://github.com/topki0325/Van-Fleet-Load-AI-Swarm/issues](https://github.com/topki0325/Van-Fleet-Load-AI-Swarm/issues)
+
+### 🔌 API 调用接口
+
+#### Ollama LAN 共享 API
+
+当启用 Ollama 共享时，应用会在本地启动一个代理服务器 (默认端口 11435)，提供安全的 Ollama API 访问。
+
+##### 基本用法
+
+1. 在 GUI 中启用共享，选择要共享的模型，并设置密码（可选）。
+2. 其他 LAN 设备可以通过发现协议找到你的共享实例。
+3. 调用 API 时使用以下格式：
+
+```bash
+curl -X POST http://<host>:11435/api/chat \
+  -H "Content-Type: application/json" \
+  -H "x-vas-key: <password>" \
+  -d '{
+    "model": "llama2",
+    "messages": [{"role": "user", "content": "Hello"}],
+    "stream": false
+  }'
+```
+
+##### 参数说明
+
+- `host`: 共享主机的 IP 地址
+- `password`: 如果设置了共享密码，则必须在 `x-vas-key` 头中提供
+- `model`: 必须是共享主机允许的模型之一
+- 其他参数与标准 Ollama API 相同
+
+##### MCP (Model Context Protocol) 集成
+
+项目支持作为 MCP 服务器运行，提供以下工具：
+
+- **mcp_pylance_mcp_s_pylanceDocString**: 获取 Python 符号的文档字符串
+- **mcp_pylance_mcp_s_pylanceDocuments**: 搜索 Pylance 文档
+- **mcp_pylance_mcp_s_pylanceFileSyntaxErrors**: 检查 Python 文件语法错误
+- **mcp_pylance_mcp_s_pylanceImports**: 分析工作区导入
+- **mcp_pylance_mcp_s_pylanceInstalledTopLevelModules**: 获取已安装的顶级模块
+- **mcp_pylance_mcp_s_pylanceInvokeRefactoring**: 应用代码重构
+- **mcp_pylance_mcp_s_pylancePythonEnvironments**: 获取 Python 环境信息
+- **mcp_pylance_mcp_s_pylanceRunCodeSnippet**: 执行 Python 代码片段
+- **mcp_pylance_mcp_s_pylanceSettings**: 获取 Pylance 设置
+- **mcp_pylance_mcp_s_pylanceSyntaxErrors**: 检查代码片段语法
+- **mcp_pylance_mcp_s_pylanceUpdatePythonEnvironment**: 切换 Python 环境
+- **mcp_pylance_mcp_s_pylanceWorkspaceRoots**: 获取工作区根目录
+- **mcp_pylance_mcp_s_pylanceWorkspaceUserFiles**: 获取用户 Python 文件
+
+要启动 MCP 服务器：
+
+```bash
+cargo run --bin mcp-server
+```
+
+然后在 MCP 客户端中配置连接到该服务器。
 
 ---
 
@@ -207,5 +264,62 @@ cargo tauri dev
 
 ### 📞 联系
 
+- 邮箱: 259901434@qq.com
 - 项目主页: [https://github.com/topki0325/Van-Fleet-Load-AI-Swarm](https://github.com/topki0325/Van-Fleet-Load-AI-Swarm)
 - Issues: [https://github.com/topki0325/Van-Fleet-Load-AI-Swarm/issues](https://github.com/topki0325/Van-Fleet-Load-AI-Swarm/issues)
+
+### 🔌 API 调用接口
+
+#### Ollama LAN 共享 API
+
+启用 Ollama 共享后，应用会在本地启动代理服务器 (默认端口 11435)，提供安全的 Ollama API 访问。
+
+##### 基本用法
+
+1. 在 GUI 中启用共享，选择要共享的模型，并设置密码（可选）。
+2. 其他 LAN 设备可通过发现协议找到你的共享实例。
+3. 调用 API 时使用以下格式：
+
+```bash
+curl -X POST http://<host>:11435/api/chat \
+  -H "Content-Type: application/json" \
+  -H "x-vas-key: <password>" \
+  -d '{
+    "model": "llama2",
+    "messages": [{"role": "user", "content": "Hello"}],
+    "stream": false
+  }'
+```
+
+##### 参数说明
+
+- `host`: 共享主机的 IP 地址
+- `password`: 如果设置了共享密码，则必须在 `x-vas-key` 头中提供
+- `model`: 必须是共享主机允许的模型之一
+- 其他参数与标准 Ollama API 相同
+
+##### MCP (Model Context Protocol) 集成
+
+项目支持作为 MCP 服务器运行，提供以下工具：
+
+- **mcp_pylance_mcp_s_pylanceDocString**: 获取 Python 符号的文档字符串
+- **mcp_pylance_mcp_s_pylanceDocuments**: 搜索 Pylance 文档
+- **mcp_pylance_mcp_s_pylanceFileSyntaxErrors**: 检查 Python 文件语法错误
+- **mcp_pylance_mcp_s_pylanceImports**: 分析工作区导入
+- **mcp_pylance_mcp_s_pylanceInstalledTopLevelModules**: 获取已安装的顶级模块
+- **mcp_pylance_mcp_s_pylanceInvokeRefactoring**: 应用代码重构
+- **mcp_pylance_mcp_s_pylancePythonEnvironments**: 获取 Python 环境信息
+- **mcp_pylance_mcp_s_pylanceRunCodeSnippet**: 执行 Python 代码片段
+- **mcp_pylance_mcp_s_pylanceSettings**: 获取 Pylance 设置
+- **mcp_pylance_mcp_s_pylanceSyntaxErrors**: 检查代码片段语法
+- **mcp_pylance_mcp_s_pylanceUpdatePythonEnvironment**: 切换 Python 环境
+- **mcp_pylance_mcp_s_pylanceWorkspaceRoots**: 获取工作区根目录
+- **mcp_pylance_mcp_s_pylanceWorkspaceUserFiles**: 获取用户 Python 文件
+
+要启动 MCP 服务器：
+
+```bash
+cargo run --bin mcp-server
+```
+
+然后在 MCP 客户端中配置连接到该服务器。
